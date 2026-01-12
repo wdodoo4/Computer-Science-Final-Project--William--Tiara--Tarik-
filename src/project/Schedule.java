@@ -5,9 +5,14 @@ package project;
  * Description: creating a the save and load method.
  */
 
-
 public class Schedule {
-	
-	public String name;
 
+	// public String name;
+
+	public static void main(String[] args) {
+
+		System.out.println("Hello");
+
+
+	}
 }
