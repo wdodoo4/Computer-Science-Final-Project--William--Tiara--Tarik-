@@ -18,10 +18,10 @@ public class PersistanceManager {
 
 	// save a schedule code
 
-	public void save (Schedule scheduel) {
+	public void save (Schedule schedule) {
 		try {
 			FileWriter Writer = new FileWriter(FILE_NAME);
-			Writer.write(Schedule.getName());
+			Writer.write(schedule.getName());
 			Writer.close();
 		} catch(IOException e) {
 			System.out.print("Error saving schedule.");
