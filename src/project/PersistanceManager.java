@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 public class PersistanceManager {
 
-	public static final String FILE_NAME = "schedule.txt";
+	public static final String FILE_NAME = "schedule.txt";	// This probably should not be a static variable in the end
 
 	// save a schedule code
 
