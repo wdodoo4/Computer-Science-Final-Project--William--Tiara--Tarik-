@@ -6,12 +6,12 @@ package project;
  * Description: coding resource class
  */
 
-public class Resource {
+public abstract class Resource {
 
 	// Attributes
 
-	public String id;
-	public String name;
+	private String id;
+	private String name;
 
 	// constructor
 
@@ -28,6 +28,9 @@ public class Resource {
 
 	public String getId() {
 		return id;
+	}
+	
+	 public abstract String getDescription();{
 	}
 
 }

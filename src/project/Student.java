@@ -11,7 +11,7 @@ public class Student {
     // changed from public to private
 	
     private String studentId;
-    public String fullName;
+    private String fullName;
     
     public Student(String studentId, String fullName) {
         this.studentId = studentId;
