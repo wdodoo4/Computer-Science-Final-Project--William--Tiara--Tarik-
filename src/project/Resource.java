@@ -33,4 +33,12 @@ public abstract class Resource {
 	 public abstract String getDescription();{
 	}
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String toString() {
+        return name + " (ID: " + id + ")";
+    }
+
 }

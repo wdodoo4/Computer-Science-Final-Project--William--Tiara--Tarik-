@@ -15,9 +15,15 @@ public class Room extends Resource {
 
 	// constructor
 
+
 	public Room(String id, String roomNumber, int capacity) {
 		super(id, "Room " + roomNumber);
 		this.roomNumber = roomNumber;
+	}
+
+	public Room(String id, String name, String roomNumber, int capacity) {
+        super(id, name);
+        this.roomNumber = roomNumber;
 		this.capacity = capacity;
 	}
 
@@ -34,5 +40,8 @@ public class Room extends Resource {
 	public String getDescription() {
         return "Room " + roomNumber + " (capacity: " + capacity + ")";
     }
-
+	
+    public String toString() {
+        return getName() + " (" + roomNumber + ", cap " + capacity + ")";
+    }
 }
