@@ -15,7 +15,7 @@ public class Assignment {
     private String id;
     private Course course;
     private Teacher teacher;
-    private Room room;
+    private Resource resource;
     private TimeBlock timeBlock;
     private ArrayList<Student> students;
     
@@ -25,7 +25,7 @@ public class Assignment {
         this.id = id;
         this.course = course;
         this.teacher = teacher;
-        this.room = room;
+        this.resource = resource;
         this.timeBlock = timeBlock;
         this.students = new ArrayList<Student>();
     }
@@ -44,8 +44,16 @@ public class Assignment {
         return teacher;
     }
     
+    public Resource getResource() {  // Changed from getRoom
+        return resource;   
+    }
+    
+    // Helper method to get Room if resource is a Room
     public Room getRoom() {
-        return room;
+        if (resource instanceof Room) {
+            return (Room) resource;
+        }
+        return null;
     }
     
     public TimeBlock getTimeBlock() {
@@ -61,9 +69,9 @@ public class Assignment {
     public void setTeacher(Teacher teacher) {
         this.teacher = teacher;
     }
-    
-    public void setRoom(Room room) {
-        this.room = room;
+   
+    public void setResource(Resource resource) {  // Changed from setRoom
+        this.resource = resource;
     }
     
     public void setTimeBlock(TimeBlock timeBlock) {

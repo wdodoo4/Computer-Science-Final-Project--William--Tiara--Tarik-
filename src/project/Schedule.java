@@ -16,7 +16,7 @@ public class Schedule {
     private ArrayList<Assignment> assignments;
     private ArrayList<Student> students;
     private ArrayList<Teacher> teachers;
-    private ArrayList<Room> rooms;
+    private ArrayList<Resource> resources;
     private ArrayList<Course> courses;
     private ArrayList<TimeBlock> timeBlocks;
     
@@ -26,7 +26,7 @@ public class Schedule {
         this.assignments = new ArrayList<Assignment>();
         this.students = new ArrayList<Student>();
         this.teachers = new ArrayList<Teacher>();
-        this.rooms = new ArrayList<Room>();
+        this.resources = new ArrayList<Resource>();
         this.courses = new ArrayList<Course>();
         this.timeBlocks = new ArrayList<TimeBlock>();
     }
@@ -49,7 +49,17 @@ public class Schedule {
         return teachers;
     }
     
+    public ArrayList<Resource> getResources() {
+        return resources;
+    }
+    
     public ArrayList<Room> getRooms() {
+        ArrayList<Room> rooms = new ArrayList<>();
+        for (Resource r : resources) {
+            if (r instanceof Room) {
+                rooms.add((Room) r);
+            }
+        }
         return rooms;
     }
     
@@ -71,8 +81,8 @@ public class Schedule {
         teachers.add(teacher);
     }
     
-    public void addRoom(Room room) {
-        rooms.add(room);
+    public void addRoom(Resource resource) {
+        resources.add(resource);
     }
     
     public void addCourse(Course course) {
@@ -106,11 +116,11 @@ public class Schedule {
         }
     }
     
-    public void removeRoom(Room room) {
-        rooms.remove(room);
-        // remove any assignments in this room
+    public void removeResource(Resource resource) {  // Changed from removeRoom
+        resources.remove(resource);
+        // remove any assignments using this resource
         for (int i = assignments.size() - 1; i >= 0; i--) {
-            if (assignments.get(i).getRoom().equals(room)) {
+            if (assignments.get(i).getResource().equals(resource)) {
                 assignments.remove(i);
             }
         }
