@@ -30,4 +30,14 @@ public class Resource {
 		return id;
 	}
 
+    // Setter (optional but useful)
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // Helpful for displaying in GUI lists
+    public String toString() {
+        return name + " (ID: " + id + ")";
+    }
+
 }

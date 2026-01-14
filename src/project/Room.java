@@ -15,12 +15,13 @@ public class Room {
 
 	// constructor
 
-	public Room(String roomNumber, int capacity) {
-		this.roomNumber = roomNumber;
+	public Room(String id, String name, String roomNumber, int capacity) {
+        super(id, name);
+        this.roomNumber = roomNumber;
 		this.capacity = capacity;
 	}
 
-	// Getter method
+	// Getter methods
 
 	public String getRoomNumber() {
 		return roomNumber;
@@ -30,4 +31,8 @@ public class Room {
 		return capacity;
 	}
 
+    //Clean output
+    public String toString() {
+        return getName() + " (" + roomNumber + ", cap " + capacity + ")";
+    }
 }
