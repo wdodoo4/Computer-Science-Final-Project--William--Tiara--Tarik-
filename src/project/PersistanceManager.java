@@ -1,8 +1,8 @@
 package project;
 
 /* 
- * Name: Tiara, William, Tarik
- * Date: 2026.01.12
+ * Name: Tiara, William, Tarik 
+* Date: 2026.01.12
  * Description: implementing the class to save and load feature
  * creating the manager class
  */
