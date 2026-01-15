@@ -44,7 +44,7 @@ public class Assignment {
         return teacher;
     }
     
-    // Return the first resource for places that expect a single resource (backwards compat).
+    // Return the first resource for places that expect a single resource
     public Resource getResource() {
         return resources.isEmpty() ? null : resources.get(0);   
     }
