@@ -9,6 +9,8 @@ import java.util.Scanner;
  * Name: Tiara, William, Tarik
  * Date: 2026.01.12
  * Description: Save and load schedules using CSV format
+ *
+ * Updated to support multiple resources per assignment.
  */
 
 public class PersistenceManager {
@@ -79,12 +81,19 @@ public class PersistenceManager {
 			// number of assignments
 			writer.write(schedule.getAssignments().size() + "\n");
 			
-			// all assignments (id,courseCode,teacherId,resourceId,timeId,studentId1,studentId2,...)
+			// all assignments (id,courseCode,teacherId,resourceId1;resourceId2,timeId,studentId1,studentId2,...)
 			for (Assignment a : schedule.getAssignments()) {
+				// join resource ids with semicolon to allow multiple resources in one CSV field
+				StringBuilder resIds = new StringBuilder();
+				for (int i = 0; i < a.getResources().size(); i++) {
+					if (i > 0) resIds.append(";");
+					resIds.append(a.getResources().get(i).getId());
+				}
+				
 				writer.write(a.getId() + "," + 
 						   a.getCourse().getCourseCode() + "," + 
 						   a.getTeacher().getTeacherId() + "," + 
-						   a.getResource().getId() + "," + 
+						   resIds.toString() + "," + 
 						   a.getTimeBlock().getId());
 				
 				// add student ids
@@ -110,6 +119,9 @@ public class PersistenceManager {
 			// line 1: schedule name
 			String name = scanner.nextLine();
 			Schedule schedule = new Schedule(name);
+			
+			// remove default timeblocks so we only use those from the file (prevents duplicates)
+			schedule.getTimeBlocks().clear();
 			
 			// line 2: number of students
 			int numStudents = Integer.parseInt(scanner.nextLine());
@@ -202,11 +214,13 @@ public class PersistenceManager {
 					}
 				}
 				
-				// find resource
-				Resource resource = null;
+				// resourceIds field may contain semicolon-separated ids
+				String resourceField = parts[3];
+				String[] resourceIds = resourceField.split(";");
+				Resource primaryResource = null;
 				for (Resource r : schedule.getResources()) {
-					if (r.getId().equals(parts[3])) {
-						resource = r;
+					if (r.getId().equals(resourceIds[0])) {
+						primaryResource = r;
 						break;
 					}
 				}
@@ -220,8 +234,21 @@ public class PersistenceManager {
 					}
 				}
 				
-				// create assignment
-				Assignment a = new Assignment(parts[0], course, teacher, (Room)resource, timeBlock);
+				// create assignment (pass first resource if present)
+				Assignment a = new Assignment(parts[0], course, teacher, primaryResource, timeBlock);
+				
+				// if more resources present, add them
+				if (resourceIds.length > 1) {
+					for (int ri = 1; ri < resourceIds.length; ri++) {
+						String rid = resourceIds[ri];
+						for (Resource r : schedule.getResources()) {
+							if (r.getId().equals(rid)) {
+								a.addResource(r);
+								break;
+							}
+						}
+					}
+				}
 				
 				// add students (starting at index 5)
 				for (int j = 5; j < parts.length; j++) {
