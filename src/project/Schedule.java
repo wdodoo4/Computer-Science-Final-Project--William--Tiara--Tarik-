@@ -6,12 +6,11 @@ import java.util.ArrayList;
  * Name: Tiara, William, Tarik
  * Date: 2026.01.12
  * Description: Schedule holds all our school resources and class assignments
+ * Now creates default timeblocks automatically
  */
 
 public class Schedule {
     
-    // Attributes
-	
     private String name;
     private ArrayList<Assignment> assignments;
     private ArrayList<Student> students;
@@ -20,7 +19,7 @@ public class Schedule {
     private ArrayList<Course> courses;
     private ArrayList<TimeBlock> timeBlocks;
     
-    // start with an empty schedule
+    // start with an empty schedule and add default timeblocks
     public Schedule(String name) {
         this.name = name;
         this.assignments = new ArrayList<Assignment>();
@@ -29,10 +28,25 @@ public class Schedule {
         this.resources = new ArrayList<Resource>();
         this.courses = new ArrayList<Course>();
         this.timeBlocks = new ArrayList<TimeBlock>();
+        
+        // add default timeblocks for each day
+        createDefaultTimeBlocks();
     }
     
-    // Getters
+    // create the standard school schedule timeblocks
+    private void createDefaultTimeBlocks() {
+        String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+        
+        for (String day : days) {
+            timeBlocks.add(new TimeBlock("P1-" + day, day, "8:50", "10:05"));
+            timeBlocks.add(new TimeBlock("P2-" + day, day, "10:10", "11:25"));
+            timeBlocks.add(new TimeBlock("P3-" + day, day, "11:30", "12:45"));
+            timeBlocks.add(new TimeBlock("P4-" + day, day, "12:50", "2:05"));
+            timeBlocks.add(new TimeBlock("P5-" + day, day, "2:10", "3:25"));
+        }
+    }
     
+    // getters
     public String getName() {
         return name;
     }
@@ -71,8 +85,7 @@ public class Schedule {
         return timeBlocks;
     }
     
-    // Setters
-    
+    // add methods
     public void addStudent(Student student) {
         students.add(student);
     }
@@ -81,6 +94,11 @@ public class Schedule {
         teachers.add(teacher);
     }
     
+    public void addResource(Resource resource) {
+        resources.add(resource);
+    }
+    
+    // keep this for backwards compatibility
     public void addRoom(Resource resource) {
         resources.add(resource);
     }
@@ -97,10 +115,10 @@ public class Schedule {
         assignments.add(assignment);
     }
     
-    // remove stuff from the schedule
+    // remove methods
     public void removeStudent(Student student) {
         students.remove(student);
-        // also take them out of any classes they're in
+        // take them out of any classes
         for (Assignment a : assignments) {
             a.removeStudent(student);
         }
@@ -116,7 +134,7 @@ public class Schedule {
         }
     }
     
-    public void removeResource(Resource resource) {  // Changed from removeRoom
+    public void removeResource(Resource resource) {
         resources.remove(resource);
         // remove any assignments using this resource
         for (int i = assignments.size() - 1; i >= 0; i--) {
