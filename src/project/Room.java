@@ -19,6 +19,7 @@ public class Room extends Resource {
 	public Room(String id, String roomNumber, int capacity) {
 		super(id, "Room " + roomNumber);
 		this.roomNumber = roomNumber;
+		this.capacity = capacity; 
 	}
 
 	public Room(String id, String name, String roomNumber, int capacity) {
