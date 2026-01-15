@@ -3,126 +3,143 @@ package project;
 import java.util.ArrayList;
 
 /*
- * Name: Tiara, Tarik, William
- * Date: 2026.01.13
- * Description: Checks for scheduling conflicts
+ * ScheduleValidator (MVP)
+ * - Keeps the conflict checks simple and easy to read
+ * - Conflict types:
+ *   - teacher double-booking
+ *   - room double-booking
+ *   - student timetable conflicts
+ *   - room capacity exceeded
+ *   - resource double-booking (equipment, carts, etc.)
  */
-
 public class ScheduleValidator {
-    
-    // check for all conflicts and return a list of problems
-	
+
     public ArrayList<String> checkConflicts(Schedule schedule) {
-        ArrayList<String> conflicts = new ArrayList<String>();
-        
-        // look for all 3 types of conflicts
-        
+        ArrayList<String> conflicts = new ArrayList<>();
+
         conflicts.addAll(checkTeacherConflicts(schedule));
         conflicts.addAll(checkRoomConflicts(schedule));
         conflicts.addAll(checkStudentConflicts(schedule));
-        
+        conflicts.addAll(checkCapacityConflicts(schedule));
+        conflicts.addAll(checkResourceDoubleBooking(schedule));
+
         return conflicts;
     }
-    
-    // Case 1: check if a teacher is teaching 2 classes at once
-    
+
     public ArrayList<String> checkTeacherConflicts(Schedule schedule) {
-        ArrayList<String> conflicts = new ArrayList<String>();
-        ArrayList<Assignment> assignments = schedule.getAssignments();
-        
-        // compare every assignment with every other assignment
-        
-        for (int i = 0; i < assignments.size(); i++) {
-            for (int j = i + 1; j < assignments.size(); j++) {
-                Assignment first = assignments.get(i);
-                Assignment second = assignments.get(j);
-                
-                // same teacher and same time = problem
-                
-                String teacherId1 = first.getTeacher().getTeacherId();
-                String teacherId2 = second.getTeacher().getTeacherId();
-                String timeId1 = first.getTimeBlock().getId();
-                String timeId2 = second.getTimeBlock().getId();
-                
-                if (teacherId1.equals(teacherId2) && timeId1.equals(timeId2)) {
-                    String message = "CONFLICT: " + first.getTeacher().getFullName() + 
-                                   " is teaching both " + first.getCourse().getTitle() + 
-                                   " and " + second.getCourse().getTitle() + 
-                                   " at the same time";
-                    conflicts.add(message);
+        ArrayList<String> conflicts = new ArrayList<>();
+        ArrayList<Assignment> list = schedule.getAssignments();
+
+        for (int i = 0; i < list.size(); i++) {
+            for (int j = i + 1; j < list.size(); j++) {
+                Assignment a1 = list.get(i);
+                Assignment a2 = list.get(j);
+                if (a1.getTeacher() == null || a2.getTeacher() == null) continue;
+                if (a1.getTimeBlock() == null || a2.getTimeBlock() == null) continue;
+
+                if (a1.getTeacher().getTeacherId().equals(a2.getTeacher().getTeacherId())
+                        && a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId())) {
+
+                    String c1 = a1.getCourse() != null ? a1.getCourse().getCourseCode() : "Unknown";
+                    String c2 = a2.getCourse() != null ? a2.getCourse().getCourseCode() : "Unknown";
+
+                    conflicts.add("TEACHER CONFLICT: " + a1.getTeacher().getFullName()
+                            + " assigned to " + c1 + " and " + c2 + " at " + a1.getTimeBlock().getId());
                 }
             }
         }
-        
         return conflicts;
     }
-    
-    // Case 2: check if a room is used for 2 classes at once
-    
+
     public ArrayList<String> checkRoomConflicts(Schedule schedule) {
-        ArrayList<String> conflicts = new ArrayList<String>();
-        ArrayList<Assignment> assignments = schedule.getAssignments();
-        
-        // compare every assignment with every other assignment
-        
-        for (int i = 0; i < assignments.size(); i++) {
-            for (int j = i + 1; j < assignments.size(); j++) {
-                Assignment first = assignments.get(i);
-                Assignment second = assignments.get(j);
-                
-                // same room and same time = problem
-                
-                String room1 = first.getRoom().getRoomNumber();
-                String room2 = second.getRoom().getRoomNumber();
-                String timeId1 = first.getTimeBlock().getId();
-                String timeId2 = second.getTimeBlock().getId();
-                
-                if (room1.equals(room2) && timeId1.equals(timeId2)) {
-                    String message = "CONFLICT: Room " + room1 + 
-                                   " is being used for both " + first.getCourse().getTitle() + 
-                                   " and " + second.getCourse().getTitle() + 
-                                   " at the same time";
-                    conflicts.add(message);
+        ArrayList<String> conflicts = new ArrayList<>();
+        ArrayList<Assignment> list = schedule.getAssignments();
+
+        for (int i = 0; i < list.size(); i++) {
+            for (int j = i + 1; j < list.size(); j++) {
+                Assignment a1 = list.get(i);
+                Assignment a2 = list.get(j);
+                if (a1.getTimeBlock() == null || a2.getTimeBlock() == null) continue;
+
+                Room r1 = a1.getRoom();
+                Room r2 = a2.getRoom();
+                if (r1 == null || r2 == null) continue;
+
+                if (r1.getId().equals(r2.getId()) && a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId())) {
+                    String c1 = a1.getCourse() != null ? a1.getCourse().getCourseCode() : "Unknown";
+                    String c2 = a2.getCourse() != null ? a2.getCourse().getCourseCode() : "Unknown";
+                    conflicts.add("ROOM CONFLICT: Room " + r1.getRoomNumber()
+                            + " used by " + c1 + " and " + c2 + " at " + a1.getTimeBlock().getId());
                 }
             }
         }
-        
         return conflicts;
     }
-    
-    // Case 3: check if a student is in 2 classes at once
-    
+
     public ArrayList<String> checkStudentConflicts(Schedule schedule) {
-        ArrayList<String> conflicts = new ArrayList<String>();
-        ArrayList<Assignment> assignments = schedule.getAssignments();
-        
-        // compare every assignment with every other assignment
-        
-        for (int i = 0; i < assignments.size(); i++) {
-            for (int j = i + 1; j < assignments.size(); j++) {
-                Assignment first = assignments.get(i);
-                Assignment second = assignments.get(j);
-                
-                // check if they're at the same time first
-                
-                String timeId1 = first.getTimeBlock().getId();
-                String timeId2 = second.getTimeBlock().getId();
-                
-                if (timeId1.equals(timeId2)) {
-                    // now check if any student is in both classes
-                    for (Student student : first.getStudents()) {
-                        if (second.getStudents().contains(student)) {
-                            String message = "CONFLICT: " + student.getFullName() + 
-                                           " is enrolled in both " + first.getCourse().getTitle() + 
-                                           " and " + second.getCourse().getTitle() + 
-                                           " at the same time";
-                            conflicts.add(message);
+        ArrayList<String> conflicts = new ArrayList<>();
+        ArrayList<Assignment> list = schedule.getAssignments();
+
+        for (int i = 0; i < list.size(); i++) {
+            for (int j = i + 1; j < list.size(); j++) {
+                Assignment a1 = list.get(i);
+                Assignment a2 = list.get(j);
+                if (a1.getTimeBlock() == null || a2.getTimeBlock() == null) continue;
+                if (!a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId())) continue;
+
+                for (Student s : a1.getStudents()) {
+                    for (Student t : a2.getStudents()) {
+                        if (s.getStudentId().equals(t.getStudentId())) {
+                            String c1 = a1.getCourse() != null ? a1.getCourse().getCourseCode() : "Unknown";
+                            String c2 = a2.getCourse() != null ? a2.getCourse().getCourseCode() : "Unknown";
+                            conflicts.add("STUDENT CONFLICT: " + s.getFullName() + " in " + c1 + " and " + c2
+                                    + " at " + a1.getTimeBlock().getId());
                         }
                     }
                 }
             }
         }
-        
+        return conflicts;
+    }
+
+    public ArrayList<String> checkCapacityConflicts(Schedule schedule) {
+        ArrayList<String> conflicts = new ArrayList<>();
+        for (Assignment a : schedule.getAssignments()) {
+            Room r = a.getRoom();
+            if (r != null) {
+                int cap = r.getCapacity();
+                int enrolled = a.getStudents().size();
+                if (enrolled > cap) {
+                    conflicts.add("CAPACITY CONFLICT: Assignment " + a.getId() + " in room " + r.getRoomNumber()
+                            + " has " + enrolled + " students (cap " + cap + ")");
+                }
+            }
+        }
+        return conflicts;
+    }
+
+    public ArrayList<String> checkResourceDoubleBooking(Schedule schedule) {
+        ArrayList<String> conflicts = new ArrayList<>();
+        ArrayList<Assignment> list = schedule.getAssignments();
+
+        for (int i = 0; i < list.size(); i++) {
+            for (int j = i + 1; j < list.size(); j++) {
+                Assignment a1 = list.get(i);
+                Assignment a2 = list.get(j);
+                if (a1.getTimeBlock() == null || a2.getTimeBlock() == null) continue;
+                if (!a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId())) continue;
+
+                for (Resource r1 : a1.getResources()) {
+                    for (Resource r2 : a2.getResources()) {
+                        if (r1.getId().equals(r2.getId())) {
+                            if (r1 instanceof Room) continue; // room conflicts are reported above
+                            conflicts.add("RESOURCE CONFLICT: Resource " + r1.getId() + " (" + r1.getName() + ") "
+                                    + "used by " + a1.getId() + " and " + a2.getId() + " at " + a1.getTimeBlock().getId());
+                        }
+                    }
+                }
+            }
+        }
         return conflicts;
     }
 }

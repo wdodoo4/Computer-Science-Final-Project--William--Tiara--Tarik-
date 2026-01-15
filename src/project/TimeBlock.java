@@ -10,10 +10,10 @@ public class TimeBlock {
     
     // Attributes
 	
-	public String id;
-    public String day;
-    public String startTime;
-    public String endTime;
+	private String id;
+    private String day;
+    private String startTime;
+    private String endTime;
     
     // Constructor
     

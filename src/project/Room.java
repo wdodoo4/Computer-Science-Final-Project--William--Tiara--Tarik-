@@ -3,24 +3,32 @@ package project;
 /*
  * Name: Tiara, Tarik, William
  * Date: 2026.01.13
- * Description: Coding Room 
+ * Description: Room is a basic classroom
  */
 
-public class Room {
+public class Room extends Resource {
 
 	// Attributes
 
-	public String roomNumber;
-	public int capacity;
+	private String roomNumber;
+	private int capacity;
 
 	// constructor
 
-	public Room(String roomNumber, int capacity) {
+
+	public Room(String id, String roomNumber, int capacity) {
+		super(id, "Room " + roomNumber);
 		this.roomNumber = roomNumber;
+		this.capacity = capacity; 
+	}
+
+	public Room(String id, String name, String roomNumber, int capacity) {
+        super(id, name);
+        this.roomNumber = roomNumber;
 		this.capacity = capacity;
 	}
 
-	// Getter method
+	// Getter methods
 
 	public String getRoomNumber() {
 		return roomNumber;
@@ -29,5 +37,12 @@ public class Room {
 	public int getCapacity() {
 		return capacity;
 	}
-
+	
+	public String getDescription() {
+        return "Room " + roomNumber + " (capacity: " + capacity + ")";
+    }
+	
+    public String toString() {
+        return getName() + " (" + roomNumber + ", cap " + capacity + ")";
+    }
 }

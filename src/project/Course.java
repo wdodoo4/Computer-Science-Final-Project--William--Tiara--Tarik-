@@ -10,8 +10,8 @@ public class Course {
 
 	// Attributes
 
-	public String courseCode;
-	public String title;
+	private String courseCode;
+	private String title;
 
 	// constructor
 
