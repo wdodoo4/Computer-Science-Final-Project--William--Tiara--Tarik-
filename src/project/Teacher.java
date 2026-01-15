@@ -6,9 +6,7 @@ package project;
  * Description: Teacher class
  */
 
-class Teacher {
-    
-    // changed from public to private
+public class Teacher {
 	
     private String teacherId;
     private String fullName;

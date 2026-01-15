@@ -21,7 +21,7 @@ public class Assignment {
     
     // Constructor
     
-    public Assignment(String id, Course course, Teacher teacher, Room room, TimeBlock timeBlock) {
+    public Assignment(String id, Course course, Teacher teacher, Resource resource, TimeBlock timeBlock) {
         this.id = id;
         this.course = course;
         this.teacher = teacher;
