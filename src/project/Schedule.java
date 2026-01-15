@@ -6,7 +6,6 @@ import java.util.ArrayList;
  * Name: Tiara, William, Tarik
  * Date: 2026.01.12
  * Description: Schedule holds all our school resources and class assignments
- * Now creates default timeblocks automatically
  */
 
 public class Schedule {
@@ -20,6 +19,7 @@ public class Schedule {
     private ArrayList<TimeBlock> timeBlocks;
     
     // start with an empty schedule and add default timeblocks
+    
     public Schedule(String name) {
         this.name = name;
         this.assignments = new ArrayList<Assignment>();
@@ -30,10 +30,12 @@ public class Schedule {
         this.timeBlocks = new ArrayList<TimeBlock>();
         
         // add default timeblocks for each day
+        
         createDefaultTimeBlocks();
     }
     
     // create the standard school schedule timeblocks
+    
     private void createDefaultTimeBlocks() {
         String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
         
@@ -47,6 +49,7 @@ public class Schedule {
     }
     
     // getters
+    
     public String getName() {
         return name;
     }
@@ -86,6 +89,7 @@ public class Schedule {
     }
     
     // add methods
+    
     public void addStudent(Student student) {
         students.add(student);
     }
@@ -116,6 +120,7 @@ public class Schedule {
     }
     
     // remove methods
+    
     public void removeStudent(Student student) {
         students.remove(student);
         // take them out of any classes
