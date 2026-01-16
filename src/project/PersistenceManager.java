@@ -58,7 +58,7 @@ public class PersistenceManager {
 					writer.write("Room," + room.getId() + "," + room.getRoomNumber() + "," + room.getCapacity() + "\n");
 				} else if (r instanceof Equipment) {
 					Equipment e = (Equipment) r;
-					writer.write("Equipment," + e.getId() + "," + e.getEquipmentType() + "," + e.getQuantity() + "\n");
+					writer.write("Equipment," + e.getId() + "," + e.getEquipmentType());
 				}
 			}
 			

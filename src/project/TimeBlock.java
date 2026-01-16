@@ -3,7 +3,7 @@ package project;
 /*
  * Name: Tiara, Tarik, William
  * Date: 2026.01.13
- * Description: TimeBlock is a specific time slot like "Monday 9:00-10:00"
+ * Description: TimeBlock. Each assignment can be assigned to a timeblock of the day. Each day has 5 timeblocks.
  */
 
 public class TimeBlock {

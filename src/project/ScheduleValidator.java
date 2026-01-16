@@ -3,8 +3,6 @@ package project;
 import java.util.ArrayList;
 
 /*
- * ScheduleValidator (MVP)
- * - Keeps the conflict checks simple and easy to read
  * - Conflict types:
  *   - teacher double-booking
  *   - room double-booking
@@ -12,6 +10,7 @@ import java.util.ArrayList;
  *   - room capacity exceeded
  *   - resource double-booking (equipment, carts, etc.)
  */
+
 public class ScheduleValidator {
 
     public ArrayList<String> checkConflicts(Schedule schedule) {

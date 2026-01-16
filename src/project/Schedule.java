@@ -34,8 +34,6 @@ public class Schedule {
         createDefaultTimeBlocks();
     }
     
-    // create the standard school schedule timeblocks
-    
     private void createDefaultTimeBlocks() {
         String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
         
