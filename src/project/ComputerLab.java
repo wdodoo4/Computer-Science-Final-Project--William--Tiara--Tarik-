@@ -7,11 +7,11 @@ package project;
  */
 
 public class ComputerLab extends Room {
-	 public ComputerLab(String id, String roomNumber, int capacity) {
-	        super(id, roomNumber, capacity);
+	 public ComputerLab(String id, String roomNumber) {
+	        super(id, roomNumber);
 	    }
 	    
 	    public String getDescription() {
-	        return "Computer Lab " + getRoomNumber() + " (capacity: " + getCapacity() + ")";
+	        return "Computer Lab " + getRoomNumber();
 	    }
 }

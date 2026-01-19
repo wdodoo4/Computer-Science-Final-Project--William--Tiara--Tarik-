@@ -1,13 +1,13 @@
 package project;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /*
  * - Conflict types:
  *   - teacher double-booking
  *   - room double-booking
  *   - student timetable conflicts
- *   - room capacity exceeded
  *   - resource double-booking (equipment, carts, etc.)
  */
 
@@ -16,11 +16,15 @@ public class ScheduleValidator {
     public ArrayList<String> checkConflicts(Schedule schedule) {
         ArrayList<String> conflicts = new ArrayList<>();
 
-        conflicts.addAll(checkTeacherConflicts(schedule));
-        conflicts.addAll(checkRoomConflicts(schedule));
-        conflicts.addAll(checkStudentConflicts(schedule));
-        conflicts.addAll(checkCapacityConflicts(schedule));
-        conflicts.addAll(checkResourceDoubleBooking(schedule));
+        ArrayList<String> teacherConflicts = checkTeacherConflicts(schedule);
+        ArrayList<String> roomConflicts = checkRoomConflicts(schedule);
+        ArrayList<String> studentConflicts = checkStudentConflicts(schedule);
+        ArrayList<String> resourceConflicts = checkResourceDoubleBooking(schedule);
+
+        conflicts.addAll(teacherConflicts);
+        conflicts.addAll(roomConflicts);
+        conflicts.addAll(studentConflicts);
+        conflicts.addAll(resourceConflicts);
 
         return conflicts;
     }
@@ -33,45 +37,132 @@ public class ScheduleValidator {
             for (int j = i + 1; j < list.size(); j++) {
                 Assignment a1 = list.get(i);
                 Assignment a2 = list.get(j);
-                if (a1.getTeacher() == null || a2.getTeacher() == null) continue;
-                if (a1.getTimeBlock() == null || a2.getTimeBlock() == null) continue;
+                
+                if (a1.getTeacher() == null) {
+                    continue;
+                }
+                
+                if (a2.getTeacher() == null) {
+                    continue;
+                }
+                
+                if (a1.getTimeBlock() == null) {
+                    continue;
+                }
+                
+                if (a2.getTimeBlock() == null) {
+                    continue;
+                }
 
-                if (a1.getTeacher().getTeacherId().equals(a2.getTeacher().getTeacherId())
-                        && a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId())) {
+                boolean sameTeacher = a1.getTeacher().getTeacherId().equals(a2.getTeacher().getTeacherId());
+                boolean sameTime = a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId());
+                
+                if (sameTeacher && sameTime) {
+                    String c1 = "Unknown";
+                    if (a1.getCourse() != null) {
+                        c1 = a1.getCourse().getCourseCode();
+                    }
+                    
+                    String c2 = "Unknown";
+                    if (a2.getCourse() != null) {
+                        c2 = a2.getCourse().getCourseCode();
+                    }
 
-                    String c1 = a1.getCourse() != null ? a1.getCourse().getCourseCode() : "Unknown";
-                    String c2 = a2.getCourse() != null ? a2.getCourse().getCourseCode() : "Unknown";
-
-                    conflicts.add("TEACHER CONFLICT: " + a1.getTeacher().getFullName()
-                            + " assigned to " + c1 + " and " + c2 + " at " + a1.getTimeBlock().getId());
+                    String conflictMessage = "**TEACHER CONFLICT:** ";
+                    conflictMessage += a1.getTeacher().getFullName();
+                    conflictMessage += " assigned to ";
+                    conflictMessage += c1;
+                    conflictMessage += " and ";
+                    conflictMessage += c2;
+                    conflictMessage += " at ";
+                    conflictMessage += a1.getTimeBlock().getId();
+                    
+                    conflicts.add(conflictMessage);
                 }
             }
         }
+        
         return conflicts;
     }
 
     public ArrayList<String> checkRoomConflicts(Schedule schedule) {
         ArrayList<String> conflicts = new ArrayList<>();
         ArrayList<Assignment> list = schedule.getAssignments();
+        HashSet<String> reportedConflicts = new HashSet<>();
 
         for (int i = 0; i < list.size(); i++) {
             for (int j = i + 1; j < list.size(); j++) {
                 Assignment a1 = list.get(i);
                 Assignment a2 = list.get(j);
-                if (a1.getTimeBlock() == null || a2.getTimeBlock() == null) continue;
+                
+                if (a1.getTimeBlock() == null) {
+                    continue;
+                }
+                
+                if (a2.getTimeBlock() == null) {
+                    continue;
+                }
+                
+                boolean sameTime = a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId());
+                if (!sameTime) {
+                    continue;
+                }
 
-                Room r1 = a1.getRoom();
-                Room r2 = a2.getRoom();
-                if (r1 == null || r2 == null) continue;
-
-                if (r1.getId().equals(r2.getId()) && a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId())) {
-                    String c1 = a1.getCourse() != null ? a1.getCourse().getCourseCode() : "Unknown";
-                    String c2 = a2.getCourse() != null ? a2.getCourse().getCourseCode() : "Unknown";
-                    conflicts.add("ROOM CONFLICT: Room " + r1.getRoomNumber()
-                            + " used by " + c1 + " and " + c2 + " at " + a1.getTimeBlock().getId());
+                // Check all rooms in both assignments
+                for (Resource res1 : a1.getResources()) {
+                    if (!(res1 instanceof Room)) {
+                        continue;
+                    }
+                    
+                    Room r1 = (Room) res1;
+                    
+                    for (Resource res2 : a2.getResources()) {
+                        if (!(res2 instanceof Room)) {
+                            continue;
+                        }
+                        
+                        Room r2 = (Room) res2;
+                        
+                        boolean sameRoom = r1.getId().equals(r2.getId());
+                        if (sameRoom) {
+                            // Create unique key to avoid duplicate reports
+                            String key = r1.getId();
+                            key += "|";
+                            key += a1.getTimeBlock().getId();
+                            key += "|";
+                            key += Math.min(i, j);
+                            key += "|";
+                            key += Math.max(i, j);
+                            
+                            if (!reportedConflicts.contains(key)) {
+                                String c1 = "Unknown";
+                                if (a1.getCourse() != null) {
+                                    c1 = a1.getCourse().getCourseCode();
+                                }
+                                
+                                String c2 = "Unknown";
+                                if (a2.getCourse() != null) {
+                                    c2 = a2.getCourse().getCourseCode();
+                                }
+                                
+                                String conflictMessage = "**ROOM CONFLICT:** Room ";
+                                conflictMessage += r1.getRoomNumber();
+                                conflictMessage += " used by ";
+                                conflictMessage += c1;
+                                conflictMessage += " and ";
+                                conflictMessage += c2;
+                                conflictMessage += " at ";
+                                conflictMessage += a1.getTimeBlock().getId();
+                                
+                                conflicts.add(conflictMessage);
+                                reportedConflicts.add(key);
+                            }
+                        }
+                    }
                 }
             }
         }
+        
         return conflicts;
     }
 
@@ -83,62 +174,90 @@ public class ScheduleValidator {
             for (int j = i + 1; j < list.size(); j++) {
                 Assignment a1 = list.get(i);
                 Assignment a2 = list.get(j);
-                if (a1.getTimeBlock() == null || a2.getTimeBlock() == null) continue;
-                if (!a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId())) continue;
+                
+                if (a1.getTimeBlock() == null) {
+                    continue;
+                }
+                
+                if (a2.getTimeBlock() == null) {
+                    continue;
+                }
+                
+                boolean sameTime = a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId());
+                if (!sameTime) {
+                    continue;
+                }
 
                 for (Student s : a1.getStudents()) {
                     for (Student t : a2.getStudents()) {
-                        if (s.getStudentId().equals(t.getStudentId())) {
-                            String c1 = a1.getCourse() != null ? a1.getCourse().getCourseCode() : "Unknown";
-                            String c2 = a2.getCourse() != null ? a2.getCourse().getCourseCode() : "Unknown";
-                            conflicts.add("STUDENT CONFLICT: " + s.getFullName() + " in " + c1 + " and " + c2
-                                    + " at " + a1.getTimeBlock().getId());
+                        boolean sameStudent = s.getStudentId().equals(t.getStudentId());
+                        if (sameStudent) {
+                            String c1 = "Unknown";
+                            if (a1.getCourse() != null) {
+                                c1 = a1.getCourse().getCourseCode();
+                            }
+                            
+                            String c2 = "Unknown";
+                            if (a2.getCourse() != null) {
+                                c2 = a2.getCourse().getCourseCode();
+                            }
+                            
+                            String conflictMessage = "**STUDENT CONFLICT:** ";
+                            conflictMessage += s.getFullName();
+                            conflictMessage += " in ";
+                            conflictMessage += c1;
+                            conflictMessage += " and ";
+                            conflictMessage += c2;
+                            conflictMessage += " at ";
+                            conflictMessage += a1.getTimeBlock().getId();
+                            
+                            conflicts.add(conflictMessage);
                         }
                     }
                 }
             }
         }
-        return conflicts;
-    }
-
-    public ArrayList<String> checkCapacityConflicts(Schedule schedule) {
-        ArrayList<String> conflicts = new ArrayList<>();
-        for (Assignment a : schedule.getAssignments()) {
-            Room r = a.getRoom();
-            if (r != null) {
-                int cap = r.getCapacity();
-                int enrolled = a.getStudents().size();
-                if (enrolled > cap) {
-                    conflicts.add("CAPACITY CONFLICT: Assignment " + a.getId() + " in room " + r.getRoomNumber()
-                            + " has " + enrolled + " students (cap " + cap + ")");
-                }
-            }
-        }
+        
         return conflicts;
     }
 
     public ArrayList<String> checkResourceDoubleBooking(Schedule schedule) {
         ArrayList<String> conflicts = new ArrayList<>();
         ArrayList<Assignment> list = schedule.getAssignments();
+        HashSet<String> reportedConflicts = new HashSet<>();
 
         for (int i = 0; i < list.size(); i++) {
             for (int j = i + 1; j < list.size(); j++) {
                 Assignment a1 = list.get(i);
                 Assignment a2 = list.get(j);
-                if (a1.getTimeBlock() == null || a2.getTimeBlock() == null) continue;
-                if (!a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId())) continue;
+                
+                if (a1.getTimeBlock() == null) {
+                    continue;
+                }
+                
+                if (a2.getTimeBlock() == null) {
+                    continue;
+                }
+                
+                boolean sameTime = a1.getTimeBlock().getId().equals(a2.getTimeBlock().getId());
+                if (!sameTime) {
+                    continue;
+                }
 
+                // Check all resources in both assignments
                 for (Resource r1 : a1.getResources()) {
                     for (Resource r2 : a2.getResources()) {
-                        if (r1.getId().equals(r2.getId())) {
-                            if (r1 instanceof Room) continue; // room conflicts are reported above
-                            conflicts.add("RESOURCE CONFLICT: Resource " + r1.getId() + " (" + r1.getName() + ") "
-                                    + "used by " + a1.getId() + " and " + a2.getId() + " at " + a1.getTimeBlock().getId());
+                        boolean sameResource = r1.getId().equals(r2.getId());
+                        if (sameResource) {
+                            if (r1 instanceof Room) {
+                                continue; // room conflicts are reported above
+                            }
                         }
                     }
                 }
             }
         }
+        
         return conflicts;
     }
 }

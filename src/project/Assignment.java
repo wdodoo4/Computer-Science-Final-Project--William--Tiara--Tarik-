@@ -23,9 +23,7 @@ public class Assignment {
         this.course = course;
         this.teacher = teacher;
         this.resources = new ArrayList<Resource>();
-        if (resource != null) {
-            this.resources.add(resource);
-        }
+        this.resources.add(resource);
         this.timeBlock = timeBlock;
         this.students = new ArrayList<Student>();
     }
@@ -46,7 +44,7 @@ public class Assignment {
     
     // Return the first resource for places that expect a single resource
     public Resource getResource() {
-        return resources.isEmpty() ? null : resources.get(0);   
+        return resources.get(0);   
     }
     
     // Return all resources attached to this assignment

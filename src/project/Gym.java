@@ -7,11 +7,11 @@ package project;
  */
 
 public class Gym extends Room {
-    public Gym(String id, String roomNumber, int capacity) {
-        super(id, roomNumber, capacity);
+    public Gym(String id, String roomNumber) {
+        super(id, roomNumber);
     }
     
     public String getDescription() {
-        return "Gym " + getRoomNumber() + " (capacity: " + getCapacity() + ")";
+        return "Gym " + getRoomNumber();
     }
 }

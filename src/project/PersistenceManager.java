@@ -46,16 +46,16 @@ public class PersistenceManager {
 			for (Resource r : schedule.getResources()) {
 				if (r instanceof ComputerLab) {
 					ComputerLab cl = (ComputerLab) r;
-					writer.write("ComputerLab," + cl.getId() + "," + cl.getRoomNumber() + "," + cl.getCapacity() + "\n");
+					writer.write("ComputerLab," + cl.getId() + "," + cl.getRoomNumber() + ",\n");
 				} else if (r instanceof ScienceLab) {
 					ScienceLab sl = (ScienceLab) r;
-					writer.write("ScienceLab," + sl.getId() + "," + sl.getRoomNumber() + "," + sl.getCapacity() + "\n");
+					writer.write("ScienceLab," + sl.getId() + "," + sl.getRoomNumber() + ",\n");
 				} else if (r instanceof Gym) {
 					Gym g = (Gym) r;
-					writer.write("Gym," + g.getId() + "," + g.getRoomNumber() + "," + g.getCapacity() + "\n");
+					writer.write("Gym," + g.getId() + "," + g.getRoomNumber() + ",\n");
 				} else if (r instanceof Room) {
 					Room room = (Room) r;
-					writer.write("Room," + room.getId() + "," + room.getRoomNumber() + "," + room.getCapacity() + "\n");
+					writer.write("Room," + room.getId() + "," + room.getRoomNumber() + ",\n");
 				} else if (r instanceof Equipment) {
 					Equipment e = (Equipment) r;
 					writer.write("Equipment," + e.getId() + "," + e.getEquipmentType());
@@ -152,19 +152,19 @@ public class PersistenceManager {
 				String type = parts[0];
 				
 				if (type.equals("Room")) {
-					Room r = new Room(parts[1], parts[2], Integer.parseInt(parts[3]));
+					Room r = new Room(parts[1], parts[2]);
 					schedule.addRoom(r);
 				} else if (type.equals("ComputerLab")) {
-					ComputerLab cl = new ComputerLab(parts[1], parts[2], Integer.parseInt(parts[3]));
+					ComputerLab cl = new ComputerLab(parts[1], parts[2]);
 					schedule.addRoom(cl);
 				} else if (type.equals("ScienceLab")) {
-					ScienceLab sl = new ScienceLab(parts[1], parts[2], Integer.parseInt(parts[3]));
+					ScienceLab sl = new ScienceLab(parts[1], parts[2]);
 					schedule.addRoom(sl);
 				} else if (type.equals("Gym")) {
-					Gym g = new Gym(parts[1], parts[2], Integer.parseInt(parts[3]));
+					Gym g = new Gym(parts[1], parts[2]);
 					schedule.addRoom(g);
 				} else if (type.equals("Equipment")) {
-					Equipment e = new Equipment(parts[1], parts[2], Integer.parseInt(parts[3]));
+					Equipment e = new Equipment(parts[1], parts[2]);
 					schedule.addRoom(e);
 				}
 			}

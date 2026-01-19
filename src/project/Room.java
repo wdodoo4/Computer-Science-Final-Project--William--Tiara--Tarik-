@@ -11,21 +11,17 @@ public class Room extends Resource {
 	// Attributes
 
 	private String roomNumber;
-	private int capacity;
 
 	// constructor
 
-
-	public Room(String id, String roomNumber, int capacity) {
+	public Room(String id, String roomNumber) {
 		super(id, "Room " + roomNumber);
-		this.roomNumber = roomNumber;
-		this.capacity = capacity; 
+		this.roomNumber = roomNumber; 
 	}
 
-	public Room(String id, String name, String roomNumber, int capacity) {
+	public Room(String id, String name, String roomNumber) {
         super(id, name);
         this.roomNumber = roomNumber;
-		this.capacity = capacity;
 	}
 
 	// Getter methods
@@ -33,16 +29,12 @@ public class Room extends Resource {
 	public String getRoomNumber() {
 		return roomNumber;
 	}
-
-	public int getCapacity() {
-		return capacity;
-	}
 	
 	public String getDescription() {
-        return "Room " + roomNumber + " (capacity: " + capacity + ")";
+        return "Room " + roomNumber;
     }
 	
     public String toString() {
-        return getName() + " (" + roomNumber + ", cap " + capacity + ")";
+        return getName() + " (" + roomNumber + ")";
     }
 }

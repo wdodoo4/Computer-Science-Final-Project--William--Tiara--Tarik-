@@ -10,7 +10,7 @@ public class Equipment extends Resource{
 	 	private String equipmentType; // "Laptop Cart", "Projector", "Basketballs", etc.
 
 	    
-	    public Equipment(String id, String equipmentType, int quantity) {
+	    public Equipment(String id, String equipmentType) {
 	        super(id, equipmentType);
 	        this.equipmentType = equipmentType;
 	    }
