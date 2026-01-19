@@ -69,7 +69,7 @@ public class Schedule {
     }
     
     public ArrayList<Room> getRooms() {
-        ArrayList<Room> rooms = new ArrayList<>();
+        ArrayList<Room> rooms = new ArrayList<Room>();
         for (Resource r : resources) {
             if (r instanceof Room) {
                 rooms.add((Room) r);
@@ -100,7 +100,6 @@ public class Schedule {
         resources.add(resource);
     }
     
-    // keep this for backwards compatibility
     public void addRoom(Resource resource) {
         resources.add(resource);
     }
@@ -131,7 +130,8 @@ public class Schedule {
         teachers.remove(teacher);
         // remove any assignments this teacher had
         for (int i = assignments.size() - 1; i >= 0; i--) {
-            if (assignments.get(i).getTeacher().equals(teacher)) {
+            Assignment current = assignments.get(i);
+            if (current.getTeacher().equals(teacher)) {
                 assignments.remove(i);
             }
         }
@@ -141,8 +141,13 @@ public class Schedule {
         resources.remove(resource);
         // remove any assignments using this resource
         for (int i = assignments.size() - 1; i >= 0; i--) {
-            if (assignments.get(i).getResource().equals(resource)) {
-                assignments.remove(i);
+            Assignment current = assignments.get(i);
+            ArrayList<Resource> assignmentResources = current.getResources();
+            for (Resource r : assignmentResources) {
+                if (r.equals(resource)) {
+                    assignments.remove(i);
+                    break;
+                }
             }
         }
     }
@@ -151,7 +156,8 @@ public class Schedule {
         courses.remove(course);
         // remove assignments for this course
         for (int i = assignments.size() - 1; i >= 0; i--) {
-            if (assignments.get(i).getCourse().equals(course)) {
+            Assignment current = assignments.get(i);
+            if (current.getCourse().equals(course)) {
                 assignments.remove(i);
             }
         }

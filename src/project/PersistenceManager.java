@@ -9,8 +9,6 @@ import java.util.Scanner;
  * Name: Tiara, William, Tarik
  * Date: 2026.01.12
  * Description: Save and load schedules using CSV format
- *
- * Updated to support multiple resources per assignment.
  */
 
 public class PersistenceManager {
@@ -47,18 +45,22 @@ public class PersistenceManager {
 				if (r instanceof ComputerLab) {
 					ComputerLab cl = (ComputerLab) r;
 					writer.write("ComputerLab," + cl.getId() + "," + cl.getRoomNumber() + ",\n");
-				} else if (r instanceof ScienceLab) {
+				} 
+				else if (r instanceof ScienceLab) {
 					ScienceLab sl = (ScienceLab) r;
 					writer.write("ScienceLab," + sl.getId() + "," + sl.getRoomNumber() + ",\n");
-				} else if (r instanceof Gym) {
+				} 
+				else if (r instanceof Gym) {
 					Gym g = (Gym) r;
 					writer.write("Gym," + g.getId() + "," + g.getRoomNumber() + ",\n");
-				} else if (r instanceof Room) {
+				} 
+				else if (r instanceof Room) {
 					Room room = (Room) r;
 					writer.write("Room," + room.getId() + "," + room.getRoomNumber() + ",\n");
-				} else if (r instanceof Equipment) {
+				} 
+				else if (r instanceof Equipment) {
 					Equipment e = (Equipment) r;
-					writer.write("Equipment," + e.getId() + "," + e.getEquipmentType());
+					writer.write("Equipment," + e.getId() + "," + e.getEquipmentType() + "\n");
 				}
 			}
 			
@@ -83,18 +85,20 @@ public class PersistenceManager {
 			
 			// all assignments (id,courseCode,teacherId,resourceId1;resourceId2,timeId,studentId1,studentId2,...)
 			for (Assignment a : schedule.getAssignments()) {
-				// join resource ids with semicolon to allow multiple resources in one CSV field
-				StringBuilder resIds = new StringBuilder();
+				
+				String resIds = "";
 				for (int i = 0; i < a.getResources().size(); i++) {
-					if (i > 0) resIds.append(";");
-					resIds.append(a.getResources().get(i).getId());
+					if (i > 0) {
+						resIds = resIds + ";";
+					}
+					resIds = resIds + a.getResources().get(i).getId();
 				}
 				
-				writer.write(a.getId() + "," + 
-						   a.getCourse().getCourseCode() + "," + 
-						   a.getTeacher().getTeacherId() + "," + 
-						   resIds.toString() + "," + 
-						   a.getTimeBlock().getId());
+				writer.write(a.getId() + ",");
+				writer.write(a.getCourse().getCourseCode() + ",");
+				writer.write(a.getTeacher().getTeacherId() + ",");
+				writer.write(resIds + ",");
+				writer.write(a.getTimeBlock().getId());
 				
 				// add student ids
 				for (Student s : a.getStudents()) {
@@ -105,22 +109,26 @@ public class PersistenceManager {
 			
 			writer.close();
 			
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			System.out.println("Error saving: " + e.getMessage());
 		}
 	}
 
 	// load a schedule from a CSV file
 	public Schedule load(String filename) {
+		Schedule schedule = new Schedule("New Schedule");
+		
 		try {
 			File file = new File(filename);
 			Scanner scanner = new Scanner(file);
 			
 			// line 1: schedule name
 			String name = scanner.nextLine();
-			Schedule schedule = new Schedule(name);
+			schedule = new Schedule(name);
 			
-			// remove default timeblocks so we only use those from the file (prevents duplicates)
+			// remove default timeblocks so we only use those from the file (prevents duplicates)  
+
 			schedule.getTimeBlocks().clear();
 			
 			// line 2: number of students
@@ -154,16 +162,20 @@ public class PersistenceManager {
 				if (type.equals("Room")) {
 					Room r = new Room(parts[1], parts[2]);
 					schedule.addRoom(r);
-				} else if (type.equals("ComputerLab")) {
+				} 
+				else if (type.equals("ComputerLab")) {
 					ComputerLab cl = new ComputerLab(parts[1], parts[2]);
 					schedule.addRoom(cl);
-				} else if (type.equals("ScienceLab")) {
+				} 
+				else if (type.equals("ScienceLab")) {
 					ScienceLab sl = new ScienceLab(parts[1], parts[2]);
 					schedule.addRoom(sl);
-				} else if (type.equals("Gym")) {
+				} 
+				else if (type.equals("Gym")) {
 					Gym g = new Gym(parts[1], parts[2]);
 					schedule.addRoom(g);
-				} else if (type.equals("Equipment")) {
+				} 
+				else if (type.equals("Equipment")) {
 					Equipment e = new Equipment(parts[1], parts[2]);
 					schedule.addRoom(e);
 				}
@@ -197,42 +209,18 @@ public class PersistenceManager {
 				String[] parts = scanner.nextLine().split(",");
 				
 				// find course
-				Course course = null;
-				for (Course c : schedule.getCourses()) {
-					if (c.getCourseCode().equals(parts[1])) {
-						course = c;
-						break;
-					}
-				}
+				Course course = findCourse(schedule, parts[1]);
 				
 				// find teacher
-				Teacher teacher = null;
-				for (Teacher t : schedule.getTeachers()) {
-					if (t.getTeacherId().equals(parts[2])) {
-						teacher = t;
-						break;
-					}
-				}
+				Teacher teacher = findTeacher(schedule, parts[2]);
 				
 				// resourceIds field may contain semicolon-separated ids
 				String resourceField = parts[3];
 				String[] resourceIds = resourceField.split(";");
-				Resource primaryResource = null;
-				for (Resource r : schedule.getResources()) {
-					if (r.getId().equals(resourceIds[0])) {
-						primaryResource = r;
-						break;
-					}
-				}
+				Resource primaryResource = findResource(schedule, resourceIds[0]);
 				
 				// find timeblock
-				TimeBlock timeBlock = null;
-				for (TimeBlock tb : schedule.getTimeBlocks()) {
-					if (tb.getId().equals(parts[4])) {
-						timeBlock = tb;
-						break;
-					}
-				}
+				TimeBlock timeBlock = findTimeBlock(schedule, parts[4]);
 				
 				// create assignment (pass first resource if present)
 				Assignment a = new Assignment(parts[0], course, teacher, primaryResource, timeBlock);
@@ -241,34 +229,73 @@ public class PersistenceManager {
 				if (resourceIds.length > 1) {
 					for (int ri = 1; ri < resourceIds.length; ri++) {
 						String rid = resourceIds[ri];
-						for (Resource r : schedule.getResources()) {
-							if (r.getId().equals(rid)) {
-								a.addResource(r);
-								break;
-							}
-						}
+						Resource additionalResource = findResource(schedule, rid);
+						a.addResource(additionalResource);
 					}
 				}
 				
 				// add students (starting at index 5)
 				for (int j = 5; j < parts.length; j++) {
-					for (Student s : schedule.getStudents()) {
-						if (s.getStudentId().equals(parts[j])) {
-							a.addStudent(s);
-							break;
-						}
-					}
+					Student student = findStudent(schedule, parts[j]);
+					a.addStudent(student);
 				}
 				
 				schedule.addAssignment(a);
 			}
 			
 			scanner.close();
-			return schedule;
 			
-		} catch (IOException e) {
+		} 
+		catch (IOException e) {
 			System.out.println("Error loading: " + e.getMessage());
-			return null;
 		}
+		
+		return schedule;
+	}
+	
+	// Helper methods to find objects in schedule
+	private Course findCourse(Schedule schedule, String courseCode) {
+		for (Course c : schedule.getCourses()) {
+			if (c.getCourseCode().equals(courseCode)) {
+				return c;
+			}
+		}
+		return new Course("UNKNOWN", "Unknown Course");
+	}
+	
+	private Teacher findTeacher(Schedule schedule, String teacherId) {
+		for (Teacher t : schedule.getTeachers()) {
+			if (t.getTeacherId().equals(teacherId)) {
+				return t;
+			}
+		}
+		return new Teacher("UNKNOWN", "Unknown Teacher");
+	}
+	
+	private Resource findResource(Schedule schedule, String resourceId) {
+		for (Resource r : schedule.getResources()) {
+			if (r.getId().equals(resourceId)) {
+				return r;
+			}
+		}
+		return new Room("UNKNOWN", "Unknown Room");
+	}
+	
+	private TimeBlock findTimeBlock(Schedule schedule, String timeBlockId) {
+		for (TimeBlock tb : schedule.getTimeBlocks()) {
+			if (tb.getId().equals(timeBlockId)) {
+				return tb;
+			}
+		}
+		return new TimeBlock("UNKNOWN", "Monday", "00:00", "00:00");
+	}
+	
+	private Student findStudent(Schedule schedule, String studentId) {
+		for (Student s : schedule.getStudents()) {
+			if (s.getStudentId().equals(studentId)) {
+				return s;
+			}
+		}
+		return new Student("UNKNOWN", "Unknown Student");
 	}
 }

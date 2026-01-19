@@ -1,7 +1,6 @@
 package project;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /*
  * - Conflict types:
@@ -88,7 +87,7 @@ public class ScheduleValidator {
     public ArrayList<String> checkRoomConflicts(Schedule schedule) {
         ArrayList<String> conflicts = new ArrayList<>();
         ArrayList<Assignment> list = schedule.getAssignments();
-        HashSet<String> reportedConflicts = new HashSet<>();
+        ArrayList<String> reportedKeys = new ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
             for (int j = i + 1; j < list.size(); j++) {
@@ -134,7 +133,16 @@ public class ScheduleValidator {
                             key += "|";
                             key += Math.max(i, j);
                             
-                            if (!reportedConflicts.contains(key)) {
+                            // Check if we already reported this conflict
+                            boolean alreadyReported = false;
+                            for (String existingKey : reportedKeys) {
+                                if (existingKey.equals(key)) {
+                                    alreadyReported = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!alreadyReported) {
                                 String c1 = "Unknown";
                                 if (a1.getCourse() != null) {
                                     c1 = a1.getCourse().getCourseCode();
@@ -155,7 +163,7 @@ public class ScheduleValidator {
                                 conflictMessage += a1.getTimeBlock().getId();
                                 
                                 conflicts.add(conflictMessage);
-                                reportedConflicts.add(key);
+                                reportedKeys.add(key);
                             }
                         }
                     }
@@ -169,6 +177,7 @@ public class ScheduleValidator {
     public ArrayList<String> checkStudentConflicts(Schedule schedule) {
         ArrayList<String> conflicts = new ArrayList<>();
         ArrayList<Assignment> list = schedule.getAssignments();
+        ArrayList<String> reportedStudentConflicts = new ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
             for (int j = i + 1; j < list.size(); j++) {
@@ -192,26 +201,41 @@ public class ScheduleValidator {
                     for (Student t : a2.getStudents()) {
                         boolean sameStudent = s.getStudentId().equals(t.getStudentId());
                         if (sameStudent) {
-                            String c1 = "Unknown";
-                            if (a1.getCourse() != null) {
-                                c1 = a1.getCourse().getCourseCode();
+                            // Create unique key for this conflict
+                            String conflictKey = s.getStudentId() + "|" + a1.getTimeBlock().getId();
+                            
+                            // Check if already reported
+                            boolean alreadyReported = false;
+                            for (String key : reportedStudentConflicts) {
+                                if (key.equals(conflictKey)) {
+                                    alreadyReported = true;
+                                    break;
+                                }
                             }
                             
-                            String c2 = "Unknown";
-                            if (a2.getCourse() != null) {
-                                c2 = a2.getCourse().getCourseCode();
+                            if (!alreadyReported) {
+                                String c1 = "Unknown";
+                                if (a1.getCourse() != null) {
+                                    c1 = a1.getCourse().getCourseCode();
+                                }
+                                
+                                String c2 = "Unknown";
+                                if (a2.getCourse() != null) {
+                                    c2 = a2.getCourse().getCourseCode();
+                                }
+                                
+                                String conflictMessage = "**STUDENT CONFLICT:** ";
+                                conflictMessage += s.getFullName();
+                                conflictMessage += " in ";
+                                conflictMessage += c1;
+                                conflictMessage += " and ";
+                                conflictMessage += c2;
+                                conflictMessage += " at ";
+                                conflictMessage += a1.getTimeBlock().getId();
+                                
+                                conflicts.add(conflictMessage);
+                                reportedStudentConflicts.add(conflictKey);
                             }
-                            
-                            String conflictMessage = "**STUDENT CONFLICT:** ";
-                            conflictMessage += s.getFullName();
-                            conflictMessage += " in ";
-                            conflictMessage += c1;
-                            conflictMessage += " and ";
-                            conflictMessage += c2;
-                            conflictMessage += " at ";
-                            conflictMessage += a1.getTimeBlock().getId();
-                            
-                            conflicts.add(conflictMessage);
                         }
                     }
                 }
@@ -224,7 +248,7 @@ public class ScheduleValidator {
     public ArrayList<String> checkResourceDoubleBooking(Schedule schedule) {
         ArrayList<String> conflicts = new ArrayList<>();
         ArrayList<Assignment> list = schedule.getAssignments();
-        HashSet<String> reportedConflicts = new HashSet<>();
+        ArrayList<String> reportedResourceConflicts = new ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
             for (int j = i + 1; j < list.size(); j++) {
@@ -251,6 +275,42 @@ public class ScheduleValidator {
                         if (sameResource) {
                             if (r1 instanceof Room) {
                                 continue; // room conflicts are reported above
+                            }
+                            
+                            // Create unique key for this resource conflict
+                            String conflictKey = r1.getId() + "|" + a1.getTimeBlock().getId();
+                            
+                            // Check if already reported
+                            boolean alreadyReported = false;
+                            for (String key : reportedResourceConflicts) {
+                                if (key.equals(conflictKey)) {
+                                    alreadyReported = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (!alreadyReported) {
+                                String c1 = "Unknown";
+                                if (a1.getCourse() != null) {
+                                    c1 = a1.getCourse().getCourseCode();
+                                }
+                                
+                                String c2 = "Unknown";
+                                if (a2.getCourse() != null) {
+                                    c2 = a2.getCourse().getCourseCode();
+                                }
+                                
+                                String conflictMessage = "**RESOURCE CONFLICT:** ";
+                                conflictMessage += r1.getId();
+                                conflictMessage += " used by ";
+                                conflictMessage += c1;
+                                conflictMessage += " and ";
+                                conflictMessage += c2;
+                                conflictMessage += " at ";
+                                conflictMessage += a1.getTimeBlock().getId();
+                                
+                                conflicts.add(conflictMessage);
+                                reportedResourceConflicts.add(conflictKey);
                             }
                         }
                     }

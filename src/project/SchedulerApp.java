@@ -8,6 +8,7 @@ import java.util.ArrayList;
 /*
  * Name: Tiara, Tarik, William
  * Date: 2026.01.15
+ * A lot of UI stuff and logic.
  */
 
 public class SchedulerApp extends JFrame {
@@ -48,7 +49,8 @@ public class SchedulerApp extends JFrame {
         editingAssignment = null;
 
         // Add some demo data to start
-        addDemoData();
+        
+        addDemoData();  //Comment out for final submittion
 
         // Setup the window
         setTitle("School Scheduler");
@@ -757,12 +759,9 @@ public class SchedulerApp extends JFrame {
                 
                 String fullFilename = filename + ".csv";
                 Schedule loaded = persistence.load(fullFilename);
-                
-                if (loaded != null) {
-                    schedule = loaded;
-                    refreshAll();
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Loaded!");
-                }
+                schedule = loaded;
+                refreshAll();
+                JOptionPane.showMessageDialog(SchedulerApp.this, "Loaded!");
             }
         });
 
@@ -802,16 +801,16 @@ public class SchedulerApp extends JFrame {
             String resourcesStr = "";
             for (int i = 0; i < a.getResources().size(); i++) {
                 if (i > 0) {
-                    resourcesStr += ", ";
+                    resourcesStr = resourcesStr + ", ";
                 }
-                resourcesStr += a.getResources().get(i).getId();
+                resourcesStr = resourcesStr + a.getResources().get(i).getId();
             }
             
             String line = a.getId() + ": " + a.getCourse().getCourseCode();
-            line += " | " + a.getTeacher().getFullName();
-            line += " | " + resourcesStr;
-            line += " | " + a.getTimeBlock().getId();
-            line += " | Students: " + a.getStudents().size();
+            line = line + " | " + a.getTeacher().getFullName();
+            line = line + " | " + resourcesStr;
+            line = line + " | " + a.getTimeBlock().getId();
+            line = line + " | Students: " + a.getStudents().size();
             
             assignmentListModel.addElement(line);
         }
@@ -832,8 +831,8 @@ public class SchedulerApp extends JFrame {
         timeCombo.removeAllItems();
         for (TimeBlock tb : schedule.getTimeBlocks()) {
             String itemText = tb.getId() + " (" + tb.getDay();
-            itemText += " " + tb.getStartTime();
-            itemText += "-" + tb.getEndTime() + ")";
+            itemText = itemText + " " + tb.getStartTime();
+            itemText = itemText + "-" + tb.getEndTime() + ")";
             timeCombo.addItem(itemText);
         }
 
@@ -847,8 +846,8 @@ public class SchedulerApp extends JFrame {
             String text = "";
             
             for (String c : conflicts) {
-                text += c;
-                text += "\n\n";
+                text = text + c;
+                text = text + "\n\n";
             }
             
             conflictArea.setText(text);
@@ -863,7 +862,7 @@ public class SchedulerApp extends JFrame {
             }
         }
         
-        return null;
+        return new Course("UNKNOWN", "Unknown Course");
     }
 
     private Teacher findTeacher(String id) {
@@ -873,7 +872,7 @@ public class SchedulerApp extends JFrame {
             }
         }
         
-        return null;
+        return new Teacher("UNKNOWN", "Unknown Teacher");
     }
 
     private Resource findResource(String id) {
@@ -883,7 +882,7 @@ public class SchedulerApp extends JFrame {
             }
         }
         
-        return null;
+        return new Room("UNKNOWN", "Unknown Room");
     }
 
     private TimeBlock findTimeBlock(String display) {
@@ -897,7 +896,7 @@ public class SchedulerApp extends JFrame {
             }
         }
         
-        return null;
+        return new TimeBlock("UNKNOWN", "Monday", "00:00", "00:00");
     }
 
     private Assignment findAssignment(String id) {

@@ -44,7 +44,7 @@ public class Assignment {
     
     // Return the first resource for places that expect a single resource
     public Resource getResource() {
-        return resources.get(0);   
+        return resources.get(0);
     }
     
     // Return all resources attached to this assignment
@@ -53,14 +53,13 @@ public class Assignment {
     }
     
     // Helper method to get Room if one of the resources is a Room (returns the first Room found)
-    
     public Room getRoom() {
         for (Resource r : resources) {
             if (r instanceof Room) {
                 return (Room) r;
             }
         }
-        return null;
+        return new Room("UNKNOWN", "Unknown Room");
     }
     
     public TimeBlock getTimeBlock() {
@@ -79,22 +78,25 @@ public class Assignment {
    
     // Replace primary resource (keeps it as the first resource)
     public void setResource(Resource resource) {
-        if (resource == null) return;
-        if (resources.isEmpty()) resources.add(resource);
-        else resources.set(0, resource);
+        if (resources.isEmpty()) {
+            resources.add(resource);
+        }
+        else {
+            resources.set(0, resource);
+        }
     }
     
-    // Add / remove additional resources
+    // Add additional resources
     public void addResource(Resource resource) {
-        if (resource == null) return;
         for (Resource r : resources) {
-            if (r.getId().equals(resource.getId())) return;
+            if (r.getId().equals(resource.getId())) {
+                return;
+            }
         }
         resources.add(resource);
     }
     
     public void removeResource(Resource resource) {
-        if (resource == null) return;
         for (int i = resources.size() - 1; i >= 0; i--) {
             if (resources.get(i).getId().equals(resource.getId())) {
                 resources.remove(i);
@@ -105,9 +107,12 @@ public class Assignment {
     public void setTimeBlock(TimeBlock timeBlock) {
         this.timeBlock = timeBlock;
     }
+    
     public void addStudent(Student student) {
         for (Student s : students) {
-            if (s.getStudentId().equals(student.getStudentId())) return;
+            if (s.getStudentId().equals(student.getStudentId())) {
+                return;
+            }
         }
         students.add(student);
     }
