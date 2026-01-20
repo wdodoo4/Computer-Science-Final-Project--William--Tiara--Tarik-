@@ -116,9 +116,7 @@ public class ScheduleController {
     
     // Assignment operations
     
-    public String createAssignment(String id, String courseCode, String teacherId, 
-                                   String timeId, ArrayList<Resource> resources,
-                                   Assignment editingAssignment) {
+    public String createAssignment(String id, String courseCode, String teacherId, String timeId, ArrayList<Resource> resources, Assignment editingAssignment) {
         
         // Validate inputs
         if (id == null || id.trim().isEmpty()) {
@@ -268,7 +266,7 @@ public class ScheduleController {
         return null;
     }
     
-    // Demo data (for testing - comment out for final submission)
+    // Demo data (for testing, comment in SchedulerApp for final submit)
     
     public void loadDemoData() {
         schedule.addStudent(new Student("S001", "Alice Brown"));
