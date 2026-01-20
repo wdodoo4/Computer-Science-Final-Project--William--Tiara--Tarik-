@@ -700,7 +700,9 @@ public class SchedulerApp extends JFrame {
         for (Assignment a : controller.getAssignments()) {
             String resourcesStr = "";
             for (int i = 0; i < a.getResources().size(); i++) {
-                if (i > 0) resourcesStr += ", ";
+                if (i > 0) {
+                	resourcesStr += ", ";
+                }
                 resourcesStr += a.getResources().get(i).getId();
             }
             
