@@ -7,15 +7,13 @@ import java.util.ArrayList;
 
 /*
  * Name: Tiara, Tarik, William
- * Date: 2026.01.15
- * A lot of UI stuff and logic.
+ * Date: 2026.01.19
+ * Description: A lot of UI stuff
  */
 
 public class SchedulerApp extends JFrame {
 
-    private Schedule schedule;
-    private PersistenceManager persistence;
-    private ScheduleValidator validator;
+    private ScheduleController controller;
 
     // Lists for displaying data
     private DefaultListModel<String> studentListModel;
@@ -25,6 +23,7 @@ public class SchedulerApp extends JFrame {
     private DefaultListModel<String> assignmentListModel;
 
     // Dropdowns for creating assignments
+    
     private JComboBox<String> courseCombo;
     private JComboBox<String> teacherCombo;
     private JComboBox<String> timeCombo;
@@ -39,18 +38,15 @@ public class SchedulerApp extends JFrame {
     private Assignment editingAssignment;
 
     public SchedulerApp() {
-        // Create the schedule and helpers
-        schedule = new Schedule("Schedule");
-        persistence = new PersistenceManager();
-        validator = new ScheduleValidator();
+        // Create the controller (handles all logic)
+        controller = new ScheduleController();
 
-        // Initialize selected resources list
+        // Initialize UI state
         selectedResources = new ArrayList<>();
         editingAssignment = null;
 
-        // Add some demo data to start
-        
-        addDemoData();  //Comment out for final submittion
+        // Load demo data for testing
+        controller.loadDemoData();  // Comment out for final submission
 
         // Setup the window
         setTitle("School Scheduler");
@@ -70,27 +66,20 @@ public class SchedulerApp extends JFrame {
         refreshAll();
     }
 
-    // Add some demo data so it's not empty
-    private void addDemoData() {
-        schedule.addStudent(new Student("S001", "Alice Brown"));
-        schedule.addStudent(new Student("S002", "Bob Chen"));
-
-        schedule.addTeacher(new Teacher("T001", "Mr. Smith"));
-        schedule.addTeacher(new Teacher("T002", "Ms. Jones"));
-
-        schedule.addCourse(new Course("ENG3U", "Grade 11 English"));
-        schedule.addCourse(new Course("MCR3U", "Grade 11 Math"));
-
-        schedule.addResource(new Room("R1", "201"));
-        schedule.addResource(new ComputerLab("CL1", "301"));
-    }
-
     // Top panel - add students, teachers, courses, resources
     private JPanel createTopPanel() {
         JPanel panel = new JPanel(new GridLayout(1, 4, 10, 10));
         panel.setBorder(BorderFactory.createTitledBorder("Add Resources"));
 
-        // Students section
+        panel.add(createStudentPanel());
+        panel.add(createTeacherPanel());
+        panel.add(createCoursePanel());
+        panel.add(createResourcePanel());
+
+        return panel;
+    }
+
+    private JPanel createStudentPanel() {
         JPanel studentPanel = new JPanel(new BorderLayout(5, 5));
         JPanel studentForm = new JPanel(new GridLayout(3, 2, 5, 5));
         JTextField studentIdField = new JTextField(8);
@@ -118,25 +107,22 @@ public class SchedulerApp extends JFrame {
                 String id = studentIdField.getText().trim();
                 String name = studentNameField.getText().trim();
                 
-                if (id.isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Enter ID and name");
-                    return;
-                }
+                String error = controller.addStudent(id, name);
                 
-                if (name.isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Enter ID and name");
-                    return;
+                if (error != null) {
+                    JOptionPane.showMessageDialog(SchedulerApp.this, error);
+                } else {
+                    studentIdField.setText("");
+                    studentNameField.setText("");
+                    refreshAll();
                 }
-                
-                Student newStudent = new Student(id, name);
-                schedule.addStudent(newStudent);
-                studentIdField.setText("");
-                studentNameField.setText("");
-                refreshAll();
             }
         });
 
-        // Teachers section
+        return studentPanel;
+    }
+
+    private JPanel createTeacherPanel() {
         JPanel teacherPanel = new JPanel(new BorderLayout(5, 5));
         JPanel teacherForm = new JPanel(new GridLayout(3, 2, 5, 5));
         JTextField teacherIdField = new JTextField(8);
@@ -164,25 +150,22 @@ public class SchedulerApp extends JFrame {
                 String id = teacherIdField.getText().trim();
                 String name = teacherNameField.getText().trim();
                 
-                if (id.isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Enter ID and name");
-                    return;
-                }
+                String error = controller.addTeacher(id, name);
                 
-                if (name.isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Enter ID and name");
-                    return;
+                if (error != null) {
+                    JOptionPane.showMessageDialog(SchedulerApp.this, error);
+                } else {
+                    teacherIdField.setText("");
+                    teacherNameField.setText("");
+                    refreshAll();
                 }
-                
-                Teacher newTeacher = new Teacher(id, name);
-                schedule.addTeacher(newTeacher);
-                teacherIdField.setText("");
-                teacherNameField.setText("");
-                refreshAll();
             }
         });
 
-        // Courses section
+        return teacherPanel;
+    }
+
+    private JPanel createCoursePanel() {
         JPanel coursePanel = new JPanel(new BorderLayout(5, 5));
         JPanel courseForm = new JPanel(new GridLayout(3, 2, 5, 5));
         JTextField courseCodeField = new JTextField(8);
@@ -210,25 +193,22 @@ public class SchedulerApp extends JFrame {
                 String code = courseCodeField.getText().trim();
                 String title = courseTitleField.getText().trim();
                 
-                if (code.isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Enter code and title");
-                    return;
-                }
+                String error = controller.addCourse(code, title);
                 
-                if (title.isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Enter code and title");
-                    return;
+                if (error != null) {
+                    JOptionPane.showMessageDialog(SchedulerApp.this, error);
+                } else {
+                    courseCodeField.setText("");
+                    courseTitleField.setText("");
+                    refreshAll();
                 }
-                
-                Course newCourse = new Course(code, title);
-                schedule.addCourse(newCourse);
-                courseCodeField.setText("");
-                courseTitleField.setText("");
-                refreshAll();
             }
         });
 
-        // Resources section
+        return coursePanel;
+    }
+
+    private JPanel createResourcePanel() {
         JPanel resourcePanel = new JPanel(new BorderLayout(5, 5));
         JPanel resourceForm = new JPanel(new GridLayout(4, 2, 5, 5));
         String[] resourceTypes = {"Room", "ComputerLab", "ScienceLab", "Gym", "Equipment"};
@@ -261,47 +241,19 @@ public class SchedulerApp extends JFrame {
                 String id = resourceIdField.getText().trim();
                 String name = resourceNameField.getText().trim();
                 
-                if (id.isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Enter ID and name");
-                    return;
-                }
+                String error = controller.addResource(type, id, name);
                 
-                if (name.isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Enter ID and name");
-                    return;
+                if (error != null) {
+                    JOptionPane.showMessageDialog(SchedulerApp.this, error);
+                } else {
+                    resourceIdField.setText("");
+                    resourceNameField.setText("");
+                    refreshAll();
                 }
-
-                Resource r;
-                
-                if (type.equals("ComputerLab")) {
-                    r = new ComputerLab(id, name);
-                } 
-                else if (type.equals("ScienceLab")) {
-                    r = new ScienceLab(id, name);
-                } 
-                else if (type.equals("Gym")) {
-                    r = new Gym(id, name);
-                } 
-                else if (type.equals("Equipment")) {
-                    r = new Equipment(id, name);
-                } 
-                else {
-                    r = new Room(id, name);
-                }
-
-                schedule.addResource(r);
-                resourceIdField.setText("");
-                resourceNameField.setText("");
-                refreshAll();
             }
         });
 
-        panel.add(studentPanel);
-        panel.add(teacherPanel);
-        panel.add(coursePanel);
-        panel.add(resourcePanel);
-
-        return panel;
+        return resourcePanel;
     }
 
     // Center panel - create assignments
@@ -338,53 +290,7 @@ public class SchedulerApp extends JFrame {
         // Select resources button action
         selectResourcesBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (schedule.getResources().isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "No resources available");
-                    return;
-                }
-
-                JPanel resourcePanel = new JPanel();
-                resourcePanel.setLayout(new BoxLayout(resourcePanel, BoxLayout.Y_AXIS));
-                ArrayList<JCheckBox> checkboxes = new ArrayList<>();
-
-                for (Resource r : schedule.getResources()) {
-                    String checkboxText = r.getId() + " - " + r.getName();
-                    JCheckBox cb = new JCheckBox(checkboxText);
-                    
-                    // Check if resource is already selected
-                    for (Resource selected : selectedResources) {
-                        if (selected.getId().equals(r.getId())) {
-                            cb.setSelected(true);
-                            break;
-                        }
-                    }
-                    
-                    checkboxes.add(cb);
-                    resourcePanel.add(cb);
-                }
-
-                JScrollPane scrollPane = new JScrollPane(resourcePanel);
-                int result = JOptionPane.showConfirmDialog(SchedulerApp.this, scrollPane, 
-                    "Select Resources", JOptionPane.OK_CANCEL_OPTION);
-
-                if (result == JOptionPane.OK_OPTION) {
-                    selectedResources.clear();
-                    
-                    for (int i = 0; i < checkboxes.size(); i++) {
-                        if (checkboxes.get(i).isSelected()) {
-                            selectedResources.add(schedule.getResources().get(i));
-                        }
-                    }
-                    
-                    // Update button text to show count
-                    if (selectedResources.isEmpty()) {
-                        selectResourcesBtn.setText("Select Resources");
-                    } 
-                    else {
-                        String buttonText = selectedResources.size() + " Resource(s) Selected";
-                        selectResourcesBtn.setText(buttonText);
-                    }
-                }
+                handleSelectResources();
             }
         });
 
@@ -407,298 +313,35 @@ public class SchedulerApp extends JFrame {
         // Create assignment button action
         createBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String id = assignIdField.getText().trim();
-                String courseStr = (String) courseCombo.getSelectedItem();
-                String teacherStr = (String) teacherCombo.getSelectedItem();
-                String timeStr = (String) timeCombo.getSelectedItem();
-
-                if (id.isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Fill all fields");
-                    return;
-                }
-                
-                if (courseStr == null) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Fill all fields");
-                    return;
-                }
-                
-                if (teacherStr == null) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Fill all fields");
-                    return;
-                }
-                
-                if (timeStr == null) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Fill all fields");
-                    return;
-                }
-
-                if (selectedResources.isEmpty()) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Select at least one resource");
-                    return;
-                }
-
-                // Find the actual objects
-                String[] courseParts = courseStr.split(" - ");
-                String courseCode = courseParts[0];
-                Course course = findCourse(courseCode);
-                
-                String[] teacherParts = teacherStr.split(" - ");
-                String teacherId = teacherParts[0];
-                Teacher teacher = findTeacher(teacherId);
-                
-                TimeBlock time = findTimeBlock(timeStr);
-
-                if (course == null) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Error finding selected items");
-                    return;
-                }
-                
-                if (teacher == null) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Error finding selected items");
-                    return;
-                }
-                
-                if (time == null) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "Error finding selected items");
-                    return;
-                }
-
-                if (editingAssignment != null) {
-                    // We're editing an existing assignment
-                    schedule.removeAssignment(editingAssignment);
-                }
-
-                Assignment a = new Assignment(id, course, teacher, selectedResources.get(0), time);
-                
-                // Add additional resources if more than one selected
-                for (int i = 1; i < selectedResources.size(); i++) {
-                    a.addResource(selectedResources.get(i));
-                }
-                
-                schedule.addAssignment(a);
-                assignIdField.setText("");
-                selectedResources.clear();
-                selectResourcesBtn.setText("Select Resources");
-                editingAssignment = null;
-                createBtn.setText("Create Assignment");
-                cancelEditBtn.setVisible(false);
-                refreshAll();
+                handleCreateAssignment(createBtn, cancelEditBtn);
             }
         });
 
         // Cancel edit button action
         cancelEditBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                assignIdField.setText("");
-                selectedResources.clear();
-                selectResourcesBtn.setText("Select Resources");
-                editingAssignment = null;
-                createBtn.setText("Create Assignment");
-                cancelEditBtn.setVisible(false);
-                
-                // Reset dropdowns to first item
-                if (courseCombo.getItemCount() > 0) {
-                    courseCombo.setSelectedIndex(0);
-                }
-                
-                if (teacherCombo.getItemCount() > 0) {
-                    teacherCombo.setSelectedIndex(0);
-                }
-                
-                if (timeCombo.getItemCount() > 0) {
-                    timeCombo.setSelectedIndex(0);
-                }
+                handleCancelEdit(createBtn, cancelEditBtn);
             }
         });
 
         // Edit assignment button action
         editAssignmentBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (assignmentListModel.getSize() == 0) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "No assignments to edit");
-                    return;
-                }
-
-                // Create a JList for selection
-                JList<String> assignList = new JList<>(assignmentListModel);
-                assignList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                assignList.setSelectedIndex(0);
-                
-                JScrollPane scrollPane = new JScrollPane(assignList);
-                int result = JOptionPane.showConfirmDialog(SchedulerApp.this, scrollPane, 
-                    "Select Assignment to Edit", JOptionPane.OK_CANCEL_OPTION);
-
-                if (result != JOptionPane.OK_OPTION) {
-                    return;
-                }
-                
-                if (assignList.getSelectedValue() == null) {
-                    return;
-                }
-
-                String selected = assignList.getSelectedValue();
-                String[] parts = selected.split(":");
-                String assignId = parts[0].trim();
-                Assignment assignment = findAssignment(assignId);
-                
-                if (assignment == null) {
-                    return;
-                }
-
-                // Load assignment data into form
-                editingAssignment = assignment;
-                assignIdField.setText(assignment.getId());
-                
-                // Set course combo
-                for (int i = 0; i < courseCombo.getItemCount(); i++) {
-                    String item = courseCombo.getItemAt(i);
-                    if (item.startsWith(assignment.getCourse().getCourseCode() + " - ")) {
-                        courseCombo.setSelectedIndex(i);
-                        break;
-                    }
-                }
-                
-                // Set teacher combo
-                for (int i = 0; i < teacherCombo.getItemCount(); i++) {
-                    String item = teacherCombo.getItemAt(i);
-                    if (item.startsWith(assignment.getTeacher().getTeacherId() + " - ")) {
-                        teacherCombo.setSelectedIndex(i);
-                        break;
-                    }
-                }
-                
-                // Set time combo
-                for (int i = 0; i < timeCombo.getItemCount(); i++) {
-                    String item = timeCombo.getItemAt(i);
-                    if (item.startsWith(assignment.getTimeBlock().getId() + " ")) {
-                        timeCombo.setSelectedIndex(i);
-                        break;
-                    }
-                }
-                
-                // Set resources
-                selectedResources.clear();
-                for (Resource r : assignment.getResources()) {
-                    selectedResources.add(r);
-                }
-                
-                String buttonText = selectedResources.size() + " Resource(s) Selected";
-                selectResourcesBtn.setText(buttonText);
-                
-                // Update UI to show we're editing
-                createBtn.setText("Update Assignment");
-                cancelEditBtn.setVisible(true);
+                handleEditAssignment(createBtn, cancelEditBtn);
             }
         });
 
         // Edit students button action
         editStudentsBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (assignmentListModel.getSize() == 0) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "No assignments to edit");
-                    return;
-                }
-
-                // Create a JList for selection
-                JList<String> assignList = new JList<>(assignmentListModel);
-                assignList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                assignList.setSelectedIndex(0);
-                
-                JScrollPane scrollPane = new JScrollPane(assignList);
-                int result = JOptionPane.showConfirmDialog(SchedulerApp.this, scrollPane, 
-                    "Select Assignment to Edit Students", JOptionPane.OK_CANCEL_OPTION);
-
-                if (result != JOptionPane.OK_OPTION) {
-                    return;
-                }
-                
-                if (assignList.getSelectedValue() == null) {
-                    return;
-                }
-
-                String selected = assignList.getSelectedValue();
-                String[] parts = selected.split(":");
-                String assignId = parts[0].trim();
-                Assignment assignment = findAssignment(assignId);
-                
-                if (assignment == null) {
-                    return;
-                }
-
-                // Show checkboxes for students
-                JPanel studentPanel = new JPanel();
-                studentPanel.setLayout(new BoxLayout(studentPanel, BoxLayout.Y_AXIS));
-                ArrayList<JCheckBox> checkboxes = new ArrayList<>();
-
-                for (Student s : schedule.getStudents()) {
-                    String checkboxText = s.getStudentId() + " - " + s.getFullName();
-                    JCheckBox cb = new JCheckBox(checkboxText);
-                    
-                    // Check if student is already enrolled
-                    for (Student enrolled : assignment.getStudents()) {
-                        if (enrolled.getStudentId().equals(s.getStudentId())) {
-                            cb.setSelected(true);
-                            break;
-                        }
-                    }
-                    
-                    checkboxes.add(cb);
-                    studentPanel.add(cb);
-                }
-
-                JScrollPane studentScrollPane = new JScrollPane(studentPanel);
-                String dialogTitle = "Select Students for " + assignId;
-                result = JOptionPane.showConfirmDialog(SchedulerApp.this, studentScrollPane, 
-                    dialogTitle, JOptionPane.OK_CANCEL_OPTION);
-
-                if (result == JOptionPane.OK_OPTION) {
-                    assignment.getStudents().clear();
-                    
-                    for (int i = 0; i < checkboxes.size(); i++) {
-                        if (checkboxes.get(i).isSelected()) {
-                            Student student = schedule.getStudents().get(i);
-                            assignment.addStudent(student);
-                        }
-                    }
-                    
-                    refreshAll();
-                }
+                handleEditStudents();
             }
         });
 
         // Remove assignment button action
         removeBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (assignmentListModel.getSize() == 0) {
-                    JOptionPane.showMessageDialog(SchedulerApp.this, "No assignments to remove");
-                    return;
-                }
-
-                JList<String> assignList = new JList<>(assignmentListModel);
-                assignList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                assignList.setSelectedIndex(0);
-                
-                JScrollPane scrollPane = new JScrollPane(assignList);
-                int result = JOptionPane.showConfirmDialog(SchedulerApp.this, scrollPane, 
-                    "Select Assignment to Remove", JOptionPane.OK_CANCEL_OPTION);
-
-                if (result != JOptionPane.OK_OPTION) {
-                    return;
-                }
-                
-                if (assignList.getSelectedValue() == null) {
-                    return;
-                }
-
-                String selected = assignList.getSelectedValue();
-                String[] parts = selected.split(":");
-                String assignId = parts[0].trim();
-                Assignment assignment = findAssignment(assignId);
-                
-                if (assignment != null) {
-                    schedule.removeAssignment(assignment);
-                    refreshAll();
-                }
+                handleRemoveAssignment();
             }
         });
 
@@ -728,185 +371,377 @@ public class SchedulerApp extends JFrame {
         // Save button action
         saveBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String filename = JOptionPane.showInputDialog("Enter filename (no extension):");
-                
-                if (filename == null) {
-                    return;
-                }
-                
-                if (filename.isEmpty()) {
-                    return;
-                }
-                
-                String fullFilename = filename + ".csv";
-                persistence.save(schedule, fullFilename);
-                JOptionPane.showMessageDialog(SchedulerApp.this, "Saved!");
+                handleSave();
             }
         });
 
         // Load button action
         loadBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String filename = JOptionPane.showInputDialog("Enter filename (no extension):");
-                
-                if (filename == null) {
-                    return;
-                }
-                
-                if (filename.isEmpty()) {
-                    return;
-                }
-                
-                String fullFilename = filename + ".csv";
-                Schedule loaded = persistence.load(fullFilename);
-                schedule = loaded;
-                refreshAll();
-                JOptionPane.showMessageDialog(SchedulerApp.this, "Loaded!");
+                handleLoad();
             }
         });
 
         return panel;
     }
 
-    // Helper methods to find objects
+    // Handler methods (keep UI logic separate from business logic)
+
+    private void handleSelectResources() {
+        if (controller.getResources().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No resources available");
+            return;
+        }
+
+        JPanel resourcePanel = new JPanel();
+        resourcePanel.setLayout(new BoxLayout(resourcePanel, BoxLayout.Y_AXIS));
+        ArrayList<JCheckBox> checkboxes = new ArrayList<>();
+
+        for (Resource r : controller.getResources()) {
+            String checkboxText = r.getId() + " - " + r.getName();
+            JCheckBox cb = new JCheckBox(checkboxText);
+            
+            // Check if resource is already selected
+            for (Resource selected : selectedResources) {
+                if (selected.getId().equals(r.getId())) {
+                    cb.setSelected(true);
+                    break;
+                }
+            }
+            
+            checkboxes.add(cb);
+            resourcePanel.add(cb);
+        }
+
+        JScrollPane scrollPane = new JScrollPane(resourcePanel);
+        int result = JOptionPane.showConfirmDialog(this, scrollPane, 
+            "Select Resources", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            selectedResources.clear();
+            
+            for (int i = 0; i < checkboxes.size(); i++) {
+                if (checkboxes.get(i).isSelected()) {
+                    selectedResources.add(controller.getResources().get(i));
+                }
+            }
+            
+            // Update button text to show count
+            if (selectedResources.isEmpty()) {
+                selectResourcesBtn.setText("Select Resources");
+            } else {
+                selectResourcesBtn.setText(selectedResources.size() + " Resource(s) Selected");
+            }
+        }
+    }
+
+    private void handleCreateAssignment(JButton createBtn, JButton cancelEditBtn) {
+        String id = assignIdField.getText().trim();
+        String courseStr = (String) courseCombo.getSelectedItem();
+        String teacherStr = (String) teacherCombo.getSelectedItem();
+        String timeStr = (String) timeCombo.getSelectedItem();
+
+        // Extract IDs from combo box selections
+        String courseCode = null;
+        String teacherId = null;
+        String timeId = null;
+
+        if (courseStr != null) {
+            courseCode = courseStr.split(" - ")[0];
+        }
+        if (teacherStr != null) {
+            teacherId = teacherStr.split(" - ")[0];
+        }
+        if (timeStr != null) {
+            timeId = timeStr.split(" \\(")[0];
+        }
+
+        // Call controller to create assignment
+        String error = controller.createAssignment(id, courseCode, teacherId, timeId, selectedResources, editingAssignment);
+
+        if (error != null) {
+            JOptionPane.showMessageDialog(this, error);
+        } else {
+            assignIdField.setText("");
+            selectedResources.clear();
+            selectResourcesBtn.setText("Select Resources");
+            editingAssignment = null;
+            createBtn.setText("Create Assignment");
+            cancelEditBtn.setVisible(false);
+            refreshAll();
+        }
+    }
+
+    private void handleCancelEdit(JButton createBtn, JButton cancelEditBtn) {
+        assignIdField.setText("");
+        selectedResources.clear();
+        selectResourcesBtn.setText("Select Resources");
+        editingAssignment = null;
+        createBtn.setText("Create Assignment");
+        cancelEditBtn.setVisible(false);
+        
+        // Reset dropdowns to first item
+        if (courseCombo.getItemCount() > 0) {
+            courseCombo.setSelectedIndex(0);
+        }
+        if (teacherCombo.getItemCount() > 0) {
+            teacherCombo.setSelectedIndex(0);
+        }
+        if (timeCombo.getItemCount() > 0) {
+            timeCombo.setSelectedIndex(0);
+        }
+    }
+
+    private void handleEditAssignment(JButton createBtn, JButton cancelEditBtn) {
+        if (assignmentListModel.getSize() == 0) {
+            JOptionPane.showMessageDialog(this, "No assignments to edit");
+            return;
+        }
+
+        JList<String> assignList = new JList<>(assignmentListModel);
+        assignList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        assignList.setSelectedIndex(0);
+        
+        JScrollPane scrollPane = new JScrollPane(assignList);
+        int result = JOptionPane.showConfirmDialog(this, scrollPane, 
+            "Select Assignment to Edit", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result != JOptionPane.OK_OPTION || assignList.getSelectedValue() == null) {
+            return;
+        }
+
+        String selected = assignList.getSelectedValue();
+        String assignId = selected.split(":")[0].trim();
+        Assignment assignment = controller.findAssignment(assignId);
+        
+        if (assignment == null) {
+            return;
+        }
+
+        // Load assignment data into form
+        editingAssignment = assignment;
+        assignIdField.setText(assignment.getId());
+        
+        // Set course combo
+        for (int i = 0; i < courseCombo.getItemCount(); i++) {
+            if (courseCombo.getItemAt(i).startsWith(assignment.getCourse().getCourseCode() + " - ")) {
+                courseCombo.setSelectedIndex(i);
+                break;
+            }
+        }
+        
+        // Set teacher combo
+        for (int i = 0; i < teacherCombo.getItemCount(); i++) {
+            if (teacherCombo.getItemAt(i).startsWith(assignment.getTeacher().getTeacherId() + " - ")) {
+                teacherCombo.setSelectedIndex(i);
+                break;
+            }
+        }
+        
+        // Set time combo
+        for (int i = 0; i < timeCombo.getItemCount(); i++) {
+            if (timeCombo.getItemAt(i).startsWith(assignment.getTimeBlock().getId() + " ")) {
+                timeCombo.setSelectedIndex(i);
+                break;
+            }
+        }
+        
+        // Set resources
+        selectedResources.clear();
+        for (Resource r : assignment.getResources()) {
+            selectedResources.add(r);
+        }
+        selectResourcesBtn.setText(selectedResources.size() + " Resource(s) Selected");
+        
+        // Update UI to show we're editing
+        createBtn.setText("Update Assignment");
+        cancelEditBtn.setVisible(true);
+    }
+
+    private void handleEditStudents() {
+        if (assignmentListModel.getSize() == 0) {
+            JOptionPane.showMessageDialog(this, "No assignments to edit");
+            return;
+        }
+
+        JList<String> assignList = new JList<>(assignmentListModel);
+        assignList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        assignList.setSelectedIndex(0);
+        
+        JScrollPane scrollPane = new JScrollPane(assignList);
+        int result = JOptionPane.showConfirmDialog(this, scrollPane, 
+            "Select Assignment to Edit Students", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result != JOptionPane.OK_OPTION || assignList.getSelectedValue() == null) {
+            return;
+        }
+
+        String selected = assignList.getSelectedValue();
+        String assignId = selected.split(":")[0].trim();
+        Assignment assignment = controller.findAssignment(assignId);
+        
+        if (assignment == null) {
+            return;
+        }
+
+        // Show checkboxes for students
+        JPanel studentPanel = new JPanel();
+        studentPanel.setLayout(new BoxLayout(studentPanel, BoxLayout.Y_AXIS));
+        ArrayList<JCheckBox> checkboxes = new ArrayList<>();
+
+        for (Student s : controller.getStudents()) {
+            String checkboxText = s.getStudentId() + " - " + s.getFullName();
+            JCheckBox cb = new JCheckBox(checkboxText);
+            
+            // Check if student is already enrolled
+            for (Student enrolled : assignment.getStudents()) {
+                if (enrolled.getStudentId().equals(s.getStudentId())) {
+                    cb.setSelected(true);
+                    break;
+                }
+            }
+            
+            checkboxes.add(cb);
+            studentPanel.add(cb);
+        }
+
+        JScrollPane studentScrollPane = new JScrollPane(studentPanel);
+        result = JOptionPane.showConfirmDialog(this, studentScrollPane, 
+            "Select Students for " + assignId, JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            ArrayList<Student> selectedStudents = new ArrayList<>();
+            
+            for (int i = 0; i < checkboxes.size(); i++) {
+                if (checkboxes.get(i).isSelected()) {
+                    selectedStudents.add(controller.getStudents().get(i));
+                }
+            }
+            
+            controller.updateAssignmentStudents(assignment, selectedStudents);
+            refreshAll();
+        }
+    }
+
+    private void handleRemoveAssignment() {
+        if (assignmentListModel.getSize() == 0) {
+            JOptionPane.showMessageDialog(this, "No assignments to remove");
+            return;
+        }
+
+        JList<String> assignList = new JList<>(assignmentListModel);
+        assignList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        assignList.setSelectedIndex(0);
+        
+        JScrollPane scrollPane = new JScrollPane(assignList);
+        int result = JOptionPane.showConfirmDialog(this, scrollPane, 
+            "Select Assignment to Remove", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result != JOptionPane.OK_OPTION || assignList.getSelectedValue() == null) {
+            return;
+        }
+
+        String selected = assignList.getSelectedValue();
+        String assignId = selected.split(":")[0].trim();
+        Assignment assignment = controller.findAssignment(assignId);
+        
+        controller.removeAssignment(assignment);
+        refreshAll();
+    }
+
+    private void handleSave() {
+        String filename = JOptionPane.showInputDialog("Enter filename (no extension):");
+        
+        if (filename == null || filename.isEmpty()) {
+            return;
+        }
+        
+        controller.save(filename);
+        JOptionPane.showMessageDialog(this, "Saved!");
+    }
+
+    private void handleLoad() {
+        String filename = JOptionPane.showInputDialog("Enter filename (no extension):");
+        
+        if (filename == null || filename.isEmpty()) {
+            return;
+        }
+        
+        controller.load(filename);
+        refreshAll();
+        JOptionPane.showMessageDialog(this, "Loaded!");
+    }
+
+    // Refresh all displays
     private void refreshAll() {
         // Refresh resource lists
         studentListModel.clear();
-        for (Student s : schedule.getStudents()) {
-            String studentText = s.getStudentId() + " - " + s.getFullName();
-            studentListModel.addElement(studentText);
+        for (Student s : controller.getStudents()) {
+            studentListModel.addElement(s.getStudentId() + " - " + s.getFullName());
         }
 
         teacherListModel.clear();
-        for (Teacher t : schedule.getTeachers()) {
-            String teacherText = t.getTeacherId() + " - " + t.getFullName();
-            teacherListModel.addElement(teacherText);
+        for (Teacher t : controller.getTeachers()) {
+            teacherListModel.addElement(t.getTeacherId() + " - " + t.getFullName());
         }
 
         courseListModel.clear();
-        for (Course c : schedule.getCourses()) {
-            String courseText = c.getCourseCode() + " - " + c.getTitle();
-            courseListModel.addElement(courseText);
+        for (Course c : controller.getCourses()) {
+            courseListModel.addElement(c.getCourseCode() + " - " + c.getTitle());
         }
 
         resourceListModel.clear();
-        for (Resource r : schedule.getResources()) {
-            String resourceText = r.getId() + " - " + r.getName();
-            resourceListModel.addElement(resourceText);
+        for (Resource r : controller.getResources()) {
+            resourceListModel.addElement(r.getId() + " - " + r.getName());
         }
 
         // Refresh assignment list
         assignmentListModel.clear();
-        for (Assignment a : schedule.getAssignments()) {
+        for (Assignment a : controller.getAssignments()) {
             String resourcesStr = "";
             for (int i = 0; i < a.getResources().size(); i++) {
-                if (i > 0) {
-                    resourcesStr = resourcesStr + ", ";
-                }
-                resourcesStr = resourcesStr + a.getResources().get(i).getId();
+                if (i > 0) resourcesStr += ", ";
+                resourcesStr += a.getResources().get(i).getId();
             }
             
-            String line = a.getId() + ": " + a.getCourse().getCourseCode();
-            line = line + " | " + a.getTeacher().getFullName();
-            line = line + " | " + resourcesStr;
-            line = line + " | " + a.getTimeBlock().getId();
-            line = line + " | Students: " + a.getStudents().size();
+            String line = a.getId() + ": " + a.getCourse().getCourseCode() +
+                         " | " + a.getTeacher().getFullName() +
+                         " | " + resourcesStr +
+                         " | " + a.getTimeBlock().getId() +
+                         " | Students: " + a.getStudents().size();
             
             assignmentListModel.addElement(line);
         }
 
         // Refresh dropdowns
         courseCombo.removeAllItems();
-        for (Course c : schedule.getCourses()) {
-            String itemText = c.getCourseCode() + " - " + c.getTitle();
-            courseCombo.addItem(itemText);
+        for (Course c : controller.getCourses()) {
+            courseCombo.addItem(c.getCourseCode() + " - " + c.getTitle());
         }
 
         teacherCombo.removeAllItems();
-        for (Teacher t : schedule.getTeachers()) {
-            String itemText = t.getTeacherId() + " - " + t.getFullName();
-            teacherCombo.addItem(itemText);
+        for (Teacher t : controller.getTeachers()) {
+            teacherCombo.addItem(t.getTeacherId() + " - " + t.getFullName());
         }
 
         timeCombo.removeAllItems();
-        for (TimeBlock tb : schedule.getTimeBlocks()) {
-            String itemText = tb.getId() + " (" + tb.getDay();
-            itemText = itemText + " " + tb.getStartTime();
-            itemText = itemText + "-" + tb.getEndTime() + ")";
+        for (TimeBlock tb : controller.getTimeBlocks()) {
+            String itemText = tb.getId() + " (" + tb.getDay() + " " + tb.getStartTime() + "-" + tb.getEndTime() + ")";
             timeCombo.addItem(itemText);
         }
 
         // Refresh conflicts
-        ArrayList<String> conflicts = validator.checkConflicts(schedule);
+        ArrayList<String> conflicts = controller.getConflicts();
         
         if (conflicts.isEmpty()) {
             conflictArea.setText("No conflicts!");
-        } 
-        else {
+        } else {
             String text = "";
-            
             for (String c : conflicts) {
-                text = text + c;
-                text = text + "\n\n";
+                text += c + "\n\n";
             }
-            
             conflictArea.setText(text);
         }
-    }
-
-    // Helper methods to find objects
-    private Course findCourse(String code) {
-        for (Course c : schedule.getCourses()) {
-            if (c.getCourseCode().equals(code)) {
-                return c;
-            }
-        }
-        
-        return new Course("UNKNOWN", "Unknown Course");
-    }
-
-    private Teacher findTeacher(String id) {
-        for (Teacher t : schedule.getTeachers()) {
-            if (t.getTeacherId().equals(id)) {
-                return t;
-            }
-        }
-        
-        return new Teacher("UNKNOWN", "Unknown Teacher");
-    }
-
-    private Resource findResource(String id) {
-        for (Resource r : schedule.getResources()) {
-            if (r.getId().equals(id)) {
-                return r;
-            }
-        }
-        
-        return new Room("UNKNOWN", "Unknown Room");
-    }
-
-    private TimeBlock findTimeBlock(String display) {
-        // Extract ID from display like "P1-Monday (Monday 8:50-10:05)"
-        String[] parts = display.split(" \\(");
-        String id = parts[0];
-        
-        for (TimeBlock tb : schedule.getTimeBlocks()) {
-            if (tb.getId().equals(id)) {
-                return tb;
-            }
-        }
-        
-        return new TimeBlock("UNKNOWN", "Monday", "00:00", "00:00");
-    }
-
-    private Assignment findAssignment(String id) {
-        for (Assignment a : schedule.getAssignments()) {
-            if (a.getId().equals(id)) {
-                return a;
-            }
-        }
-        
-        return null;
     }
 
     public static void main(String[] args) {

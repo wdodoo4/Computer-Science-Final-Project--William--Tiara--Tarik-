@@ -1,0 +1,42 @@
+Schedule
+2
+S001,Alice Brown
+S002,Bob Chen
+2
+T001,Mr. Smith
+T002,Ms. Jones
+2
+Room,R1,201,
+ComputerLab,CL1,301,
+2
+ENG3U,Grade 11 English
+MCR3U,Grade 11 Math
+25
+P1-Monday,Monday,8:50,10:05
+P2-Monday,Monday,10:10,11:25
+P3-Monday,Monday,11:30,12:45
+P4-Monday,Monday,12:50,2:05
+P5-Monday,Monday,2:10,3:25
+P1-Tuesday,Tuesday,8:50,10:05
+P2-Tuesday,Tuesday,10:10,11:25
+P3-Tuesday,Tuesday,11:30,12:45
+P4-Tuesday,Tuesday,12:50,2:05
+P5-Tuesday,Tuesday,2:10,3:25
+P1-Wednesday,Wednesday,8:50,10:05
+P2-Wednesday,Wednesday,10:10,11:25
+P3-Wednesday,Wednesday,11:30,12:45
+P4-Wednesday,Wednesday,12:50,2:05
+P5-Wednesday,Wednesday,2:10,3:25
+P1-Thursday,Thursday,8:50,10:05
+P2-Thursday,Thursday,10:10,11:25
+P3-Thursday,Thursday,11:30,12:45
+P4-Thursday,Thursday,12:50,2:05
+P5-Thursday,Thursday,2:10,3:25
+P1-Friday,Friday,8:50,10:05
+P2-Friday,Friday,10:10,11:25
+P3-Friday,Friday,11:30,12:45
+P4-Friday,Friday,12:50,2:05
+P5-Friday,Friday,2:10,3:25
+2
+qweqwe,ENG3U,T001,CL1,P1-Monday,S001,S002
+qweqweqwe,ENG3U,T001,R1;CL1,P1-Monday
