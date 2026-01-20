@@ -49,7 +49,7 @@ public class SchedulerApp extends JFrame {
         controller.loadDemoData();  // Comment out for final submission
 
         // Setup the window
-        setTitle("School Scheduler");
+        setTitle("Scheduler");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
@@ -385,7 +385,7 @@ public class SchedulerApp extends JFrame {
         return panel;
     }
 
-    // Handler methods (keep UI logic separate from business logic)
+    // Handler methods 
 
     private void handleSelectResources() {
         if (controller.getResources().isEmpty()) {
