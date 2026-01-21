@@ -5,8 +5,7 @@ import java.util.ArrayList;
 /*
  * Name: Tiara, Tarik, William
  * Date: 2026.01.19
- * Description: Handles all the business logic and validation.
- *              UI calls these methods but doesn't do the actual work.
+ * Description: Handles all the logic and validation. App calls these methods.
  */
 
 public class ScheduleController {

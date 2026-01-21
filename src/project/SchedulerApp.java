@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class SchedulerApp extends JFrame {
 
-    // Controller handles all the business logic
+    // Controller handles all the logic
     private ScheduleController controller;
 
     // List models hold the data that appears in JLists
