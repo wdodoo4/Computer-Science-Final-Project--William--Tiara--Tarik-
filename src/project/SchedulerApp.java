@@ -8,8 +8,7 @@ import java.util.ArrayList;
 /*
  * Name: Tiara, Tarik, William
  * Date: 2026.01.19
- * Description: GUI for the scheduler. Shows all the forms, buttons, and lists.
- *              All the actual logic is in ScheduleController.
+ * Description: GUI for the scheduler. Shows all the forms, buttons, and lists. All the actual logic is in ScheduleController.
  */
 
 public class SchedulerApp extends JFrame {
